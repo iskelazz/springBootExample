@@ -1,10 +1,14 @@
 package co.empathy.academy.demo.DAOs;
+import org.json.*;
+
+import java.io.IOException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.index.mapper.SourceToParse;
 
 public class SearchEngineElastic implements SearchEngine{
     private RestClient client;
@@ -122,7 +126,7 @@ public class SearchEngineElastic implements SearchEngine{
     }
 
     @Override
-    public String postDocuments(String index, String id, String Body) throws Exception {
+    public String postDocuments(String index, String id, String Body) throws IOException {
         Request request = new Request("POST", "/" + index + "/_doc/" + id);
         request.addParameter("pretty", "true");
         request.setJsonEntity(Body);
@@ -131,7 +135,7 @@ public class SearchEngineElastic implements SearchEngine{
             HttpEntity entity = response.getEntity();
             String responseString = EntityUtils.toString(entity, "UTF-8");
             return responseString;
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

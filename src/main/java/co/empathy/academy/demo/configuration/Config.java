@@ -1,7 +1,7 @@
 package co.empathy.academy.demo.configuration;
 
-import co.empathy.academy.demo.service.SearchEngine;
-import co.empathy.academy.demo.service.SearchEngineElastic;
+import co.empathy.academy.demo.DAOs.SearchEngine;
+import co.empathy.academy.demo.DAOs.SearchEngineElastic;
 import co.empathy.academy.demo.service.SearchService;
 import co.empathy.academy.demo.service.SearchServiceElastic;
 

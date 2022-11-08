@@ -81,7 +81,7 @@ class SearchServiceControllerTest {
         String queryResults = searchController.putIndex(index,body);
         assertTrue(queryResults == "{\"shards_acknowledged\": \"true\"}");
     }
-    @Test
+  /*   @Test
     void givenQueryWithResults_whenpostDocuments_thenReturnString() throws Exception {
         String index = "samples";
         String body = "{\"peli\":\"Ant-man\"}";
@@ -90,7 +90,7 @@ class SearchServiceControllerTest {
         SearchController searchController = new SearchController(searchService);
         String queryResults = searchController.postDocuments(index,body);
         assertTrue(queryResults == "{\"result\": \"created\"}");
-    }
+    }*/
     
     @Test
     void givenQueryWithResults_whenpostDocumentswithId_thenReturnString() throws Exception {

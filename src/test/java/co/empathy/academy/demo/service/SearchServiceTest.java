@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import co.empathy.academy.demo.DAOs.SearchEngine;
-
 @ExtendWith(MockitoExtension.class)
 class SearchServiceTest {
 
@@ -82,7 +80,8 @@ class SearchServiceTest {
         String queryResults = searchService.putIndex(index,body);
         assertTrue(queryResults == "{\"shards_acknowledged\": \"true\"}");
     }
-    @Test
+   
+   /*  @Test
     void givenQueryWithResults_whenpostDocuments_thenReturnString() throws Exception {
         String index = "samples";
         String body = "{\"peli\":\"Ant-man\"}";
@@ -91,7 +90,7 @@ class SearchServiceTest {
         SearchService searchService = new SearchServiceElastic(searchEngine);
         String queryResults = searchService.postDocuments(index,body);
         assertTrue(queryResults == "{\"result\": \"created\"}");
-    }
+    }*/
     
     @Test
     void givenQueryWithResults_whenpostDocumentswithId_thenReturnString() throws Exception {

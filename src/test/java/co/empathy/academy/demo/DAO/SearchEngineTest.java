@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import co.empathy.academy.demo.DAOs.SearchEngineElastic;
+import co.empathy.academy.demo.service.SearchEngineElastic;
 
 @ExtendWith(MockitoExtension.class)
 class SearchEngineTest {

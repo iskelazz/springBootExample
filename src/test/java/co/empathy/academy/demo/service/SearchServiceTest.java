@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import co.empathy.academy.demo.DAOs.SearchDataAccess;
+
 @ExtendWith(MockitoExtension.class)
 class SearchServiceTest {
 
@@ -17,8 +19,8 @@ class SearchServiceTest {
         String query = "query with results";
         SearchEngine searchEngine = mock(SearchEngine.class);
         given(searchEngine.search(query)).willReturn("Jane");
-
-        SearchService searchService = new SearchServiceElastic(searchEngine);
+        SearchDataAccess Searchclient = mock(SearchDataAccess.class);;
+        SearchService searchService = new SearchServiceElastic(searchEngine,Searchclient);
 
         String queryResults = searchService.search(query);
 
@@ -29,8 +31,9 @@ class SearchServiceTest {
     void givenQueryWithResults_whengetVersion_thenReturnString() throws Exception {
         SearchEngine searchEngine = mock(SearchEngine.class);
         given(searchEngine.getVersion()).willReturn("You Know, for Search");
+        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
 
-        SearchService searchService = new SearchServiceElastic(searchEngine);
+        SearchService searchService = new SearchServiceElastic(searchEngine,Searchclient);
 
         String queryResults = searchService.getVersion();
 
@@ -43,8 +46,9 @@ class SearchServiceTest {
         String body = "{\"peli\": \"all quiet on the\"}";
         SearchEngine searchEngine = mock(SearchEngine.class);
         given(searchEngine.search(index,body)).willReturn("{\"source\": {\"peli\":\"All quiet on the western front\"}}");
+        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
 
-        SearchService searchService = new SearchServiceElastic(searchEngine);
+        SearchService searchService = new SearchServiceElastic(searchEngine,Searchclient);
 
         String queryResults = searchService.search(index,body);
 
@@ -55,7 +59,8 @@ class SearchServiceTest {
     void givenQueryWithResults_whengetIndex_thenReturnString() throws Exception {
         SearchEngine searchEngine = mock(SearchEngine.class);
         given(searchEngine.getIndex()).willReturn("\"tagline\": \"You Know, for Search\"");
-        SearchService searchService = new SearchServiceElastic(searchEngine);
+        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
+        SearchService searchService = new SearchServiceElastic(searchEngine, Searchclient);
         String queryResults = searchService.getIndex();
         assertTrue(queryResults == "\"tagline\": \"You Know, for Search\"");
     }
@@ -65,7 +70,8 @@ class SearchServiceTest {
         String index = "samples";
         SearchEngine searchEngine = mock(SearchEngine.class);
         given(searchEngine.putIndex(index)).willReturn("{\"acknowledged\": \"true\"}");
-        SearchService searchService = new SearchServiceElastic(searchEngine);
+        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
+        SearchService searchService = new SearchServiceElastic(searchEngine, Searchclient);
         String queryResults = searchService.putIndex(index);
         assertTrue(queryResults == "{\"acknowledged\": \"true\"}");
     }
@@ -76,7 +82,8 @@ class SearchServiceTest {
         String body = "{\"colors\":\"grey\"}";
         SearchEngine searchEngine = mock(SearchEngine.class);
         given(searchEngine.putIndex(index,body)).willReturn("{\"shards_acknowledged\": \"true\"}");
-        SearchService searchService = new SearchServiceElastic(searchEngine);
+        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
+        SearchService searchService = new SearchServiceElastic(searchEngine, Searchclient);
         String queryResults = searchService.putIndex(index,body);
         assertTrue(queryResults == "{\"shards_acknowledged\": \"true\"}");
     }
@@ -99,7 +106,8 @@ class SearchServiceTest {
         String id = "14";
         SearchEngine searchEngine = mock(SearchEngine.class);
         given(searchEngine.postDocuments(index,body,id)).willReturn("{\"result\": \"created\"}");
-        SearchService searchService = new SearchServiceElastic(searchEngine);
+        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
+        SearchService searchService = new SearchServiceElastic(searchEngine,Searchclient);
         String queryResults = searchService.postDocuments(index,body,id);
         assertTrue(queryResults == "{\"result\": \"created\"}");
     }
@@ -109,8 +117,9 @@ class SearchServiceTest {
         SearchEngine searchEngine = mock(SearchEngine.class);
         Throwable expectedException = new Exception("Error while searching");
         given(searchEngine.search(null)).willThrow(expectedException);
+        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
 
-        SearchService searchService = new SearchServiceElastic(searchEngine);
+        SearchService searchService = new SearchServiceElastic(searchEngine,Searchclient);
 
         assertThrows(expectedException.getClass(), () -> searchService.search(null));
     }

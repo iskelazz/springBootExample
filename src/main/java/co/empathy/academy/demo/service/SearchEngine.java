@@ -15,5 +15,5 @@ public interface SearchEngine {
     String addDocument (String index, Movie Body) throws Exception;
     String postDocuments (String index, String id, String Body) throws Exception;
     void mapping (String index, String mapping) throws Exception;
-    String bulk (List<Movie> movies) throws Exception;
+    String bulk (List<Movie> movies, String index) throws Exception;
 }

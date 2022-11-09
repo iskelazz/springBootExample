@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import co.empathy.academy.demo.DAOs.SearchDataAccess;
 import co.empathy.academy.demo.Models.Movie;
 import co.empathy.academy.demo.util.InputValidationException;
 import co.empathy.academy.demo.util.ReaderTSV;
@@ -21,9 +23,11 @@ public class SearchServiceElastic implements SearchService {
 
     @Autowired
     private SearchEngine elasticEngine;
+    private SearchDataAccess elasticClient; 
 
-    public SearchServiceElastic(SearchEngine elasticEngine){
+    public SearchServiceElastic(SearchEngine elasticEngine, SearchDataAccess elasticClient){
         this.elasticEngine = elasticEngine;
+        this.elasticClient = elasticClient;
     }
     @Override
     public String search(String query) throws Exception {
@@ -68,7 +72,12 @@ public class SearchServiceElastic implements SearchService {
     public void indexDatabase() throws Exception{
         File f = new File("/Users/alejandrorg/title.basics.tsv");
         ReaderTSV reader = new ReaderTSV(f);
-        reader.tsvtoMovie();
+        LinkedList<Movie> bulk = new LinkedList<>();
+        System.out.println(reader.extractLine());
+        while(reader.getFinished()==false){ 
+            bulk = reader.tsvtoMovies();
+            elasticClient.bulk(bulk,"simba");
+        }
     }
 
     public void validateMovie(Movie movie) throws InputValidationException{

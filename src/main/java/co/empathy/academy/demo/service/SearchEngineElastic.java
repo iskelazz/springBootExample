@@ -8,6 +8,7 @@ import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import co.empathy.academy.demo.Models.Movie;
@@ -15,7 +16,7 @@ import co.empathy.academy.demo.util.JsonConversor;
 public class SearchEngineElastic implements SearchEngine{
     @Autowired
     private RestClient client;
-
+    
 
     public SearchEngineElastic(RestClient client) {
         this.client = client;
@@ -164,19 +165,29 @@ public class SearchEngineElastic implements SearchEngine{
     }
 
     @Override
-    public String bulk(List<Movie> movies) throws Exception {
-        Request request = new Request("POST", "/_bulk");
+    public String bulk(List<Movie> movies, String index) throws Exception {
+        Request request = new Request("POST", "/" + index + "/_bulk");
         request.addParameter("pretty", "true");
-        //String json = new Gson().toJson(movies);
-        return "json";
-        //request.setJsonEntity(Body);
-        /*try {
+        String json = "";
+        for (Movie movie : movies){
+            json = json + "{\"index\":{\"_id\":\"" + movie.getId().toString() + "\""
+            + "}} \n{\"create\": " + JsonConversor.movietoJSON(movie) + "} \n\n";
+        }
+        request.setJsonEntity(json);
+        try {
             Response response = client.performRequest(request);
             HttpEntity entity = response.getEntity();
             String responseString = EntityUtils.toString(entity, "UTF-8");
+            JSONObject jose = new JSONObject(responseString);
+            Boolean errors = jose.getBoolean("errors");
+            if (errors==false) System.out.println("Va bien");
+            else System.out.println("Va mal");
+            
+            
+            return responseString;
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }*/
+        }
         
     }
 

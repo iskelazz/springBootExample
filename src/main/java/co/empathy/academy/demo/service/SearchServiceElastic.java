@@ -1,18 +1,16 @@
 package co.empathy.academy.demo.service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+//import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.empathy.academy.demo.DAOs.SearchDataAccess;
 import co.empathy.academy.demo.Models.Movie;
-import co.empathy.academy.demo.util.InputValidationException;
 import co.empathy.academy.demo.util.ReaderTSV;
+import co.empathy.academy.demo.util.InputValidationException;
 import co.empathy.academy.demo.util.Validator;
 
 // This is the service class that will implement your search service logic
@@ -37,6 +35,25 @@ public class SearchServiceElastic implements SearchService {
     public String search(String index, String body) throws Exception {
         return elasticEngine.search(index, body);
     }
+
+    @Override
+    public List<Movie> multiMatchSearch(String query, String fields, String index) {
+        String[] fieldsArray = fields.split(",");
+        return elasticClient.throwQuery(elasticClient.multiMatchQuery(query, fieldsArray), index);
+    }
+
+    @Override
+    public List<Movie> queryTermSearch(String query, String field, String index){
+        //Query prueba = elasticClient.queryTerm(query,field);
+        //System.out.println(prueba.toString());    
+        return elasticClient.throwQuery(elasticClient.queryTerm(query,field), index);
+    }
+
+    @Override
+    public List<Movie> queryTermsSearch(String query[], String field, String index){
+        return elasticClient.throwQuery(elasticClient.queryTerms(query,field), index);
+    }
+
     @Override
     public String getVersion() throws Exception {
         return elasticEngine.getVersion();
@@ -65,16 +82,24 @@ public class SearchServiceElastic implements SearchService {
 
     @Override
     public void mapping (String index, String mapping) throws Exception{
-        elasticEngine.mapping(index, mapping);
+        elasticClient.mapping(index, mapping);
+    }
+
+    @Override
+    public void analyzer(String index, String analyzer) throws Exception {
+        elasticClient.analyzer(index, analyzer);
+        
     }
 
     @Override
     public void indexDatabase() throws Exception{
-        File f = new File("/Users/alejandrorg/title.basics.tsv");
-        ReaderTSV reader = new ReaderTSV(f);
+        File basics = new File("/Users/alejandrorg/title.basics.tsv");
+        File ratings = new File("/Users/alejandrorg/title.ratings.tsv");
+        ReaderTSV reader = new ReaderTSV(basics,ratings);
         LinkedList<Movie> bulk = new LinkedList<>();
-        System.out.println(reader.extractLine());
-        while(reader.getFinished()==false){ 
+        System.out.println(reader.extractHeadersBasics());
+        System.out.println(reader.extractHeadersRatings());
+       while(!reader.getFinished()){ 
             bulk = reader.tsvtoMovies();
             elasticClient.bulk(bulk,"simba");
         }
@@ -86,18 +111,4 @@ public class SearchServiceElastic implements SearchService {
             //Validate all fields. In production
     }
     
-    public String getStringFromFile(String fileName) throws IOException {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        InputStream in = classLoader.getResourceAsStream(fileName);
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = in.read(buffer)) != -1) {
-            result.write(buffer, 0, length);
-        }
-        return result.toString(StandardCharsets.UTF_8.name());
-    }
-
-
-
 }

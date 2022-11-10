@@ -16,7 +16,9 @@ public class JsonConversor {
                 json.optString("startYear"),
                 json.optString("endYear"),
                 json.optInt("runtimeMinutes"),
-                json.optString("genre")
+                json.optString("genre"),
+                json.optString("averageRatings"),
+                json.optString("numVotes")
         );
     }
     //less the genre list. No used yet

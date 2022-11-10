@@ -1,6 +1,9 @@
 package co.empathy.academy.demo.controller;
 
 
+import java.io.IOException;
+import java.util.List;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,6 +42,21 @@ public class SearchController {
            return searchservice.search(index, body);
      }
 
+     @GetMapping("/{index}/search/_multi")
+     public ResponseEntity<List<Movie>> multiMatchSearch(@PathVariable String index, @RequestParam("query") String query, @RequestParam("fields") String fields) {
+        return ResponseEntity.ok().body(searchservice.multiMatchSearch(query, fields,index));
+    }
+
+     @GetMapping(value="/{index}/search/_term", produces="application/json")
+     public ResponseEntity<List<Movie>> searchByTerm (@PathVariable String index, @RequestParam(name="query") String query  ,@RequestParam(name="field") String field){
+        return ResponseEntity.ok().body(searchservice.queryTermSearch(query, field, index));
+     }
+
+     @GetMapping("/{index}/search/_terms")
+     public ResponseEntity<List<Movie>> searchByTerms (@PathVariable String index, @RequestParam(name="query") String query [] ,@RequestParam(name="field") String field){
+        return ResponseEntity.ok().body(searchservice.queryTermsSearch(query, field, index));
+     }
+
     //Get status elasticSearch database in form "localhost:8080"
     @GetMapping("")
     public String getVersion() throws Exception{
@@ -62,10 +80,29 @@ public class SearchController {
     }
     
     @PutMapping(value="/{index}/mapping", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<JSONObject> mapping(@PathVariable String index, @RequestBody String body) throws Exception{
-        searchservice.mapping(index,body);
+    public ResponseEntity<JSONObject> mapping(@PathVariable String index, @RequestBody String body) throws IOException{
+        try {
+            searchservice.mapping(index,body);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(
+           HttpStatus.INTERNAL_SERVER_ERROR, "Server not found", e);
+        }
         return ResponseEntity.created(null).body(null);
     }
+
+    @PutMapping(value="/{index}/analyzer", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<JSONObject> analyzer(@PathVariable String index, @RequestBody String body) throws IOException{
+        try {
+            searchservice.analyzer(index,body);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(
+           HttpStatus.INTERNAL_SERVER_ERROR, "Server not found", e);
+        }
+        return ResponseEntity.created(null).body(null);
+    }
+
 
     @PostMapping(value = "/{index}/_doc", consumes = "application/json", produces = "application/json")
     public ResponseEntity<JSONObject> postDocuments(@PathVariable String index, @RequestBody Movie body) throws Exception{

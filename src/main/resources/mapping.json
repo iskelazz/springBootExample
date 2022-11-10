@@ -26,6 +26,12 @@
     },
     "genres": {
       "type": "keyword"
+    },
+    "ratings": {
+      "type" : "keyword"
+    },
+    "numVotes": {
+      "type" : "keyword"
     }
   }
 }

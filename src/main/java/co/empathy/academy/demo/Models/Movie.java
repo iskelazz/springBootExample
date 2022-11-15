@@ -22,6 +22,6 @@ public class Movie {
     private String endYear;
     private Integer runtimesMinutes;
     private String genre;  
-    private String averageRating;
-    private String numVotes;
+    private Double averageRating;
+    private int numVotes;
 }

@@ -7,19 +7,23 @@
       "type": "keyword"
     },
     "primaryTitle": {
-      "type": "text"
+      "type": "text",
+      "analyzer": "analyzer_imdb",
+      "search_analyzer": "analyzer_imdb"
     },
     "originalTitle": {
-      "type": "text"
+      "type": "text",
+      "analyzer": "analyzer_imdb",
+      "search_analyzer": "analyzer_imdb"
     },
     "isAdult": {
       "type": "boolean"
     },
     "startYear": {
-      "type": "integer"
+      "type": "keyword"
     },
     "endYear": {
-      "type": "integer"
+      "type": "keyword"
     },
     "runtimeMinutes": {
       "type": "integer"
@@ -28,10 +32,10 @@
       "type": "keyword"
     },
     "ratings": {
-      "type" : "keyword"
+      "type" : "double"
     },
     "numVotes": {
-      "type" : "keyword"
+      "type" : "integer"
     }
   }
 }

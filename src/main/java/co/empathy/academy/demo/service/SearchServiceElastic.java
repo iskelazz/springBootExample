@@ -1,12 +1,16 @@
 package co.empathy.academy.demo.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-//import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.empathy.academy.demo.DAOs.SearchDataAccess;
 import co.empathy.academy.demo.Models.Movie;
 import co.empathy.academy.demo.util.ReaderTSV;
@@ -27,6 +31,7 @@ public class SearchServiceElastic implements SearchService {
         this.elasticEngine = elasticEngine;
         this.elasticClient = elasticClient;
     }
+    
     @Override
     public String search(String query) throws Exception {
         return elasticEngine.search(query);
@@ -37,20 +42,18 @@ public class SearchServiceElastic implements SearchService {
     }
 
     @Override
-    public List<Movie> multiMatchSearch(String query, String fields, String index) {
+    public List<Movie> multiMatchSearch(String query, String fields, String index) throws ElasticsearchException, IOException {
         String[] fieldsArray = fields.split(",");
         return elasticClient.throwQuery(elasticClient.multiMatchQuery(query, fieldsArray), index);
     }
 
     @Override
-    public List<Movie> queryTermSearch(String query, String field, String index){
-        //Query prueba = elasticClient.queryTerm(query,field);
-        //System.out.println(prueba.toString());    
+    public List<Movie> queryTermSearch(String query, String field, String index) throws ElasticsearchException, IOException{
         return elasticClient.throwQuery(elasticClient.queryTerm(query,field), index);
     }
 
     @Override
-    public List<Movie> queryTermsSearch(String query[], String field, String index){
+    public List<Movie> queryTermsSearch(String query[], String field, String index) throws ElasticsearchException, IOException{
         return elasticClient.throwQuery(elasticClient.queryTerms(query,field), index);
     }
 
@@ -91,6 +94,7 @@ public class SearchServiceElastic implements SearchService {
         
     }
 
+    //Basics y Ratings
     @Override
     public void indexDatabase() throws Exception{
         File basics = new File("/Users/alejandrorg/title.basics.tsv");
@@ -99,8 +103,8 @@ public class SearchServiceElastic implements SearchService {
         LinkedList<Movie> bulk = new LinkedList<>();
         System.out.println(reader.extractHeadersBasics());
         System.out.println(reader.extractHeadersRatings());
-       while(!reader.getFinished()){ 
-            bulk = reader.tsvtoMovies();
+        while(!reader.getFinished()){ 
+            bulk = reader.tsvToMovies();
             elasticClient.bulk(bulk,"simba");
         }
     }
@@ -110,5 +114,14 @@ public class SearchServiceElastic implements SearchService {
         
             //Validate all fields. In production
     }
+
+    //By default, order by numVotes
+    @Override
+    public List<Movie> startYearFilter(String index, String startYear) throws Exception {
+        Map<String, Aggregation> map = elasticClient.orderBy("numVotes", SortOrder.Desc);
+        return elasticClient.throwOrderByQuery(elasticClient.queryTerm(startYear,"startYear"),map, index, "numVotes");
+    }
+
+    
     
 }

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import co.empathy.academy.demo.util.JsonConversor;
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.empathy.academy.demo.Models.Movie;
 import co.empathy.academy.demo.service.SearchService;
 
@@ -43,17 +44,17 @@ public class SearchController {
      }
 
      @GetMapping("/{index}/search/_multi")
-     public ResponseEntity<List<Movie>> multiMatchSearch(@PathVariable String index, @RequestParam("query") String query, @RequestParam("fields") String fields) {
+     public ResponseEntity<List<Movie>> multiMatchSearch(@PathVariable String index, @RequestParam("query") String query, @RequestParam("fields") String fields) throws ElasticsearchException, IOException {
         return ResponseEntity.ok().body(searchservice.multiMatchSearch(query, fields,index));
     }
 
      @GetMapping(value="/{index}/search/_term", produces="application/json")
-     public ResponseEntity<List<Movie>> searchByTerm (@PathVariable String index, @RequestParam(name="query") String query  ,@RequestParam(name="field") String field){
+     public ResponseEntity<List<Movie>> searchByTerm (@PathVariable String index, @RequestParam(name="query") String query  ,@RequestParam(name="field") String field) throws ElasticsearchException, IOException{
         return ResponseEntity.ok().body(searchservice.queryTermSearch(query, field, index));
      }
 
      @GetMapping("/{index}/search/_terms")
-     public ResponseEntity<List<Movie>> searchByTerms (@PathVariable String index, @RequestParam(name="query") String query [] ,@RequestParam(name="field") String field){
+     public ResponseEntity<List<Movie>> searchByTerms (@PathVariable String index, @RequestParam(name="query") String query [] ,@RequestParam(name="field") String field) throws ElasticsearchException, IOException{
         return ResponseEntity.ok().body(searchservice.queryTermsSearch(query, field, index));
      }
 
@@ -128,4 +129,11 @@ public class SearchController {
         searchservice.indexDatabase();
         return ResponseEntity.accepted().build();
     }
+
+    @GetMapping("/{index}/filter")
+    public ResponseEntity<List<Movie>> startYear(@PathVariable String index,@RequestParam(name="startyear") String startYear) throws Exception{
+        List<Movie>body = searchservice.startYearFilter(index, startYear);
+        return ResponseEntity.created(null).body(body);
+    }
+
 }

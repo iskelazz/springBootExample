@@ -21,4 +21,12 @@ public interface SearchDataAccess {
     //List<Movie> aggs (Query query) throws ElasticsearchException, IOException;
     List<Movie> throwOrderByQuery(Query query,Map<String,Aggregation> aggs, String index, String key) throws ElasticsearchException, IOException;
     Map<String, Aggregation> orderBy(String key, SortOrder sort);
+
+    Query numericFilter (String key, int minValue, int maxValue);
+    Query numericFilter (String key, double minValue, double maxValue);
+    Query numericFilter (String key, int minValue, int maxValue, double minRating);
+    Query matchQuery (String match, String field);
+    
+    Query must (List<Query> queries);
+    Query should (List<Query> queries);
 }

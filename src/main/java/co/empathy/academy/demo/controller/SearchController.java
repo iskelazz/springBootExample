@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +33,7 @@ public class SearchController {
         this.searchservice = searchService;
     }
     //Performs search in elasticSearch database in form "localhost:8080/search?query=example"
-    @GetMapping("/search")
+    @GetMapping("/_search")
     public String search(@RequestParam(name="query") String query) throws Exception{
 		  return searchservice.search(query);
     }
@@ -130,9 +131,37 @@ public class SearchController {
         return ResponseEntity.accepted().build();
     }
 
-    @GetMapping("/{index}/filter")
-    public ResponseEntity<List<Movie>> startYear(@PathVariable String index,@RequestParam(name="startyear") String startYear) throws Exception{
-        List<Movie>body = searchservice.startYearFilter(index, startYear);
+    @GetMapping("/{index}/max_rating")
+    public ResponseEntity<List<Movie>> maxAverageRating(@PathVariable String index) throws Exception{
+        List<Movie>body = searchservice.maxAverageRating(index);
+        return ResponseEntity.created(null).body(body);
+    }
+
+    @GetMapping("/{index}/min_rating")
+    public ResponseEntity<List<Movie>> minAverageRating(@PathVariable String index) throws Exception{
+        List<Movie>body = searchservice.minAverageRating(index);
+        return ResponseEntity.created(null).body(body);
+    }
+    
+
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Movie>> search(
+        @Nullable @RequestParam(name="genre") String [] genre,
+
+        @Nullable @RequestParam(name="minyear") Integer minYear,
+        @Nullable @RequestParam(name="maxyear") Integer maxYear,
+
+        @Nullable @RequestParam(name="minminutes") Integer minMinutes,
+        @Nullable @RequestParam(name="maxminutes") Integer maxMinutes,
+
+        @Nullable @RequestParam(name="minscore") Float minScore,
+        @Nullable @RequestParam(name="maxscore") Float maxScore,
+
+        @Nullable @RequestParam(name="type") String type
+    ) throws Exception{
+        List<Movie>body = searchservice.processParam("simba",genre,minYear,maxYear,minMinutes,maxMinutes
+            ,minScore,maxScore,type);
         return ResponseEntity.created(null).body(body);
     }
 

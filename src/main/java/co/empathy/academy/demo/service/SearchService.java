@@ -19,9 +19,21 @@ public interface SearchService {
     String putIndex(String index, String body) throws Exception;
     String postDocuments(String index, Movie body) throws Exception;
     String postDocuments(String index, String id, String body) throws Exception;
+    
+    //processing
+    List<Movie> processParam(String index, String[] genre, Integer maxYear, Integer minYear,
+        Integer minMinutes, Integer maxMinutes,Float minRating, Float maxRating,String type) throws Exception;
+
+    //Settings
     void mapping(String index, String mapping) throws Exception;
     void analyzer(String index, String mapping) throws Exception;
-    List<Movie> startYearFilter(String index,String startYear) throws Exception;
+    
+    
+    //Filters
+    List<Movie> maxAverageRating (String index) throws ElasticsearchException, IOException;
+    List<Movie> minAverageRating (String index) throws ElasticsearchException, IOException;
+
+    //Indexing
     void indexDatabase() throws Exception; 
 
 

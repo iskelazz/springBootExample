@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.empathy.academy.demo.DAOs.SearchDataAccess;
 import co.empathy.academy.demo.Models.Movie;
 import co.empathy.academy.demo.util.ReaderTSV;
@@ -23,6 +24,7 @@ import co.empathy.academy.demo.util.Validator;
 
 public class SearchServiceElastic implements SearchService {
 
+    private static final int INT_MAX = 2000000000;
     @Autowired
     private SearchEngine elasticEngine;
     private SearchDataAccess elasticClient; 
@@ -75,7 +77,6 @@ public class SearchServiceElastic implements SearchService {
     }
     @Override
     public String postDocuments(String index, Movie body) throws Exception {
-        validateMovie(body);
         return elasticEngine.addDocument(index,body);
     }
     @Override
@@ -115,13 +116,68 @@ public class SearchServiceElastic implements SearchService {
             //Validate all fields. In production
     }
 
+    //Filters
     //By default, order by numVotes
+    
+
     @Override
-    public List<Movie> startYearFilter(String index, String startYear) throws Exception {
-        Map<String, Aggregation> map = elasticClient.orderBy("numVotes", SortOrder.Desc);
-        return elasticClient.throwOrderByQuery(elasticClient.queryTerm(startYear,"startYear"),map, index, "numVotes");
+    public List<Movie> maxAverageRating (String index) throws ElasticsearchException, IOException{
+        Map<String, Aggregation> map = elasticClient.orderBy("averageRating", SortOrder.Desc);
+        return elasticClient.throwOrderByQuery(elasticClient.numericFilter("numVotes",30000,INT_MAX),map, index, "averageRating");
     }
 
+    @Override
+    public List<Movie> minAverageRating (String index) throws ElasticsearchException, IOException{
+        Map<String, Aggregation> map = elasticClient.orderBy("averageRating", SortOrder.Asc);
+        return elasticClient.throwOrderByQuery(elasticClient.numericFilter("numVotes",30000,INT_MAX,0.1),map, index, "averageRating");
+    }
+
+    public List<Query> genreFilter (String index, String[] genre) throws Exception {
+        List<Query> List_genre = new LinkedList<>();
+        for (int i = 0; i<genre.length;i++){
+            List_genre.add(elasticClient.matchQuery(genre[i],"genre"));
+        }
+        return List_genre;
+    }
+
+    public Query rangeYearFilter (int minYear, int maxYear) throws Exception {
+        return elasticClient.numericFilter("startYear",minYear,maxYear);
+    }
+    
+    public Query runtimeFilter (int minValue, int maxValue) throws Exception {
+        return elasticClient.numericFilter("runtimesMinutes",minValue,maxValue);
+    }
+
+    public Query averageRatingFilter (double minRating, double maxRating) throws Exception {
+        return elasticClient.numericFilter("averageRating",minRating,maxRating);
+    }
+
+    public Query typeFilter(String type) throws Exception {
+        return elasticClient.queryTerm(type, "titleType");
+    }
+
+    @Override
+    public List<Movie> processParam(String index, String[] genre, Integer minYear, Integer maxYear, 
+    Integer minMinutes, Integer maxMinutes, Float minRating, Float maxRating, String type) throws Exception {
+        Map<String, Aggregation> map = elasticClient.orderBy("numVotes", SortOrder.Desc);
+        List<Query> List_genre = new LinkedList<>();
+        if (genre != null){
+            List_genre.addAll(genreFilter(index,genre));
+        }
+        if ((maxYear != null)&& (minYear!=null)){
+            List_genre.add(rangeYearFilter(minYear, maxYear));
+        }
+        if ((minMinutes!=null)&&(maxMinutes!=null)){
+            List_genre.add(runtimeFilter(minMinutes,maxMinutes));
+        }
+        if ((minRating!=null)&&(maxRating!=null)){
+            List_genre.add(averageRatingFilter(minRating,maxRating));
+        }
+        if ((type!=null) && ((type.equals("movie")) || (type.equals("tvSeries")))){
+            List_genre.add(typeFilter(type));
+        }
+        return elasticClient.throwOrderByQuery(elasticClient.must(List_genre),map, index, "numVotes"); 
+    }
     
     
 }

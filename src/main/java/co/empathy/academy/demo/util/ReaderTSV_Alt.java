@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 import co.empathy.academy.demo.Models.Movie;
 
@@ -78,8 +80,9 @@ public class ReaderTSV_Alt {
                     numVotes = "0";
                 }
                 if (basics_tsv[4].equals("0")){
-                    Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, basics_tsv[5], 
-                    basics_tsv[6], toInt(basics_tsv[7]), basics_tsv[8],toDouble(rating),toInt(numVotes));
+                    List<String> genre =Arrays.asList(basics_tsv[8].split(","));
+                    Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, toInt(basics_tsv[5]), 
+                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes));
                     //System.out.println(movie.toString());
                     results.add(movie);
                     numberRow++;

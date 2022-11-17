@@ -1,5 +1,7 @@
 package co.empathy.academy.demo.Models;
 
+import java.util.List;
+
 //import java.util.LinkedList; Falta el campo genre que es una lista
 
 import lombok.*;
@@ -18,10 +20,10 @@ public class Movie {
     private String primaryTitle;
     private String originalTitle;
     private Boolean isAdult;
-    private String startYear;
+    private Integer startYear;
     private String endYear;
     private Integer runtimesMinutes;
-    private String genre;  
+    private List<String> genre;  
     private Double averageRating;
-    private int numVotes;
+    private Integer numVotes;
 }

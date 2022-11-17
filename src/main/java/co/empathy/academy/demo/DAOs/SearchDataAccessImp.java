@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.json.JSONArray;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermsQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermsQueryField;
@@ -22,6 +24,8 @@ import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.*;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MultiMatchQuery;
 import co.empathy.academy.demo.Models.Movie;
 import co.empathy.academy.demo.util.JsonConversor;
@@ -113,6 +117,60 @@ public class SearchDataAccessImp implements SearchDataAccess{
 
         esClient.indices().open(o -> o.index(index));
         
+    }
+
+    @Override
+    public Query matchQuery (String match, String field){
+        Query termQuery = MatchQuery.of(t -> t.field(field).query(match))._toQuery();
+        return termQuery;
+    }
+
+    @Override
+    public Query must (List<Query> queries){
+        return BoolQuery.of(t -> t.must(queries))._toQuery();  
+        
+    }
+
+    @Override
+    public Query should (List<Query> queries){
+        return BoolQuery.of(t -> t.should(queries))._toQuery();  
+        
+    }
+
+    @Override
+    public Query numericFilter (String key, int minValue, int maxValue){
+        Query numericFilter = RangeQuery.of(t -> t.field(key)
+            .lte(JsonData.of(maxValue))
+            .gte(JsonData.of(minValue)))  
+            ._toQuery();
+        return numericFilter;
+    }
+
+    @Override
+    public Query numericFilter (String key, double minValue, double maxValue){
+        Query numericFilter = RangeQuery.of(t -> t.field(key)
+            .lte(JsonData.of(maxValue))
+            .gte(JsonData.of(minValue)))  
+            ._toQuery();
+        return numericFilter;
+    }
+
+    //Numeric filter with rating min
+    @Override
+    public Query numericFilter (String key, int minValue, int maxValue, double minRating){
+        Query numericFilter = RangeQuery.of(t -> t.field(key)
+            .lte(JsonData.of(maxValue))
+            .gte(JsonData.of(minValue)))  
+            ._toQuery();
+        Query ratingFilter = RangeQuery.of(t -> t.field("averageRating")
+        .gte(JsonData.of(minRating)))
+        ._toQuery();
+        LinkedList<Query> queries = new LinkedList<>();
+        queries.add(numericFilter);
+        queries.add(ratingFilter);
+        Query must = BoolQuery.of(t -> t.must(queries))._toQuery();    
+        Query result = BoolQuery.of(t -> t.filter(must))._toQuery();
+        return result;
     }
 
     @Override

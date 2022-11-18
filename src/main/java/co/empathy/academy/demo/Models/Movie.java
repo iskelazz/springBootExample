@@ -26,4 +26,5 @@ public class Movie {
     private List<String> genre;  
     private Double averageRating;
     private Integer numVotes;
+    private List<Aka> akas;
 }

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import co.empathy.academy.demo.Models.Aka;
 import co.empathy.academy.demo.Models.Movie;
 
 public class ReaderTSV {
@@ -17,17 +18,21 @@ public class ReaderTSV {
     private boolean isfinished;
     private final BufferedReader reader_basics;
     private final BufferedReader reader_ratings;
+    private final BufferedReader reader_akas;
     private boolean progress_ratings;
     private boolean progress_basics;
+    private boolean progress_akas;
     private LinkedList<String[]> ratingslist = new LinkedList<>();
+    private LinkedList<String[]> akaslist = new LinkedList<>();
+
 
     
 
-    public ReaderTSV(File basics, File ratings) {
+    public ReaderTSV(File basics, File ratings, File akas) {
         try {
             this.reader_basics = new BufferedReader(new InputStreamReader(new FileInputStream(basics)));
             this.reader_ratings = new BufferedReader(new InputStreamReader(new FileInputStream(ratings)));
-
+            this.reader_akas = new BufferedReader(new InputStreamReader(new FileInputStream(akas)));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -43,15 +48,22 @@ public class ReaderTSV {
         return Headers;
     }
 
+    public String extractHeadersAkas() throws IOException{
+        String Headers = reader_akas.readLine();
+        return Headers;
+    }
+
     public LinkedList<Movie> tsvToMovies() throws IOException{
         Integer numberRow = 0;
         String line_ratings=null;
         String line_basics = null;
+        String line_akas = null;
         progress_basics = true;
         progress_ratings = true;
+        progress_akas = true;
         isfinished = false;
         LinkedList<Movie> results = new LinkedList<>();
-        while (numberRow<20000 || progress_basics == false || progress_ratings == false){
+        while (numberRow<20000 || progress_basics == false || progress_ratings == false || progress_akas==false){
             String rating = null;
             String numVotes = null;
             if (progress_basics){
@@ -62,13 +74,20 @@ public class ReaderTSV {
                 line_ratings = null;
                 line_ratings = reader_ratings.readLine();
             }
-            if (line_basics == null || line_ratings == null) {
+            if (progress_akas){
+                line_akas = null;
+                line_akas = reader_akas.readLine();
+            }
+            if (line_basics == null || line_ratings == null || line_akas == null) {
                 isfinished = true;
                 break;
             }
             String[] basics_tsv = line_basics.split("\t");
-            line_ratings = findIDMatch(basics_tsv[0], line_ratings, numberRow);
-            if (progress_basics && progress_ratings){
+            
+            line_ratings = findIDGenerics(basics_tsv[0], line_ratings, numberRow, ratingslist, "ratings", reader_ratings);
+            if (progress_basics) line_akas = findIDGenerics(basics_tsv[0], line_akas, numberRow, akaslist, "akas", reader_akas);
+            else progress_akas=false;
+            if (progress_basics && progress_ratings && progress_akas){
                 String [] last_rating = line_ratings.split("\t");
                 if (last_rating[0].equals(basics_tsv[0])){
                     rating = last_rating[1];
@@ -78,10 +97,17 @@ public class ReaderTSV {
                     rating = "0";
                     numVotes = "0";
                 }
+                List<Aka> index_aka = new LinkedList<>();
+                for (String [] ak : akaslist) { 
+                    if (ak[0].equals(basics_tsv[0])){
+                        Aka result = new Aka(ak[1],ak[2],ak[3],toBool(ak[4]));
+                        index_aka.add(result);
+                    }
+                }
                 if (basics_tsv[4].equals("0")){
                     List<String> genre = Arrays.asList(basics_tsv[8].split(","));
                     Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, toInt(basics_tsv[5]), 
-                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes));
+                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes),index_aka);
                     //System.out.println(movie.toString());
                     results.add(movie);
                     numberRow++;
@@ -99,10 +125,19 @@ public class ReaderTSV {
                     rating = "0";
                     numVotes = "0";
                 }
+                List<Aka> index_aka = new LinkedList<>();
+                for (String [] ak : akaslist) { 
+                    if (ak[0].equals(basics_tsv[0])){
+                        Aka result = new Aka(ak[1],ak[2],ak[3],toBool(ak[4]));
+                        index_aka.add(result);
+                        //akaslist.remove(ak); 
+                    }
+                }
+                //System.out.println(index_aka.toString());
                 if (basics_tsv[4].equals("0")){
                     List<String> genre = Arrays.asList(basics_tsv[8].split(","));
                     Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, toInt(basics_tsv[5]), 
-                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes));
+                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes),index_aka);
                     //System.out.println(movie.toString());
                     results.add(movie);
                     numberRow++;
@@ -122,41 +157,51 @@ public class ReaderTSV {
         return isfinished;
     }
 
-    private String findIDMatch (String id_basics, String line_ratings, int numberRow) throws IOException{
-        String [] processed_ratings = line_ratings.split("\t");
+    private String findIDGenerics(String id_basics, String line_file, int numberRow, 
+        List<String []> list, String key, BufferedReader aReader) throws IOException{
+        String [] processed = line_file.split("\t");
         int basics = toInt(id_basics.substring(2,9));
-        int ratings = toInt(processed_ratings[0].substring(2,9));
+        int generic = toInt(processed[0].substring(2,9));
         //System.out.println("Basics " + basics + ", ratings: " + ratings);
         String newLine = null;
-        if (basics == ratings){
-            ratingslist.clear();
+        if (basics == generic){
+            list.clear();
             if (numberRow>20000) {
                 progress_basics = true;
-                progress_ratings = true;
-                return line_ratings;
+                change_bool(key, true);
+                return line_file;
             }
-            while (basics == ratings){
-                ratingslist.add(processed_ratings);
+            while (basics == generic){
+                list.add(processed);
                 newLine = null;
-                newLine = reader_ratings.readLine();
+                newLine = aReader.readLine();
                 if (newLine == null) break;
-                processed_ratings = newLine.split("\t");
-                ratings = toInt(processed_ratings[0].substring(2, 9));
+                processed = newLine.split("\t");
+                generic = toInt(processed[0].substring(2, 9));
             }
-            progress_ratings = false;
+            change_bool(key, false);
             progress_basics = true;
             return newLine;
-        } else if (basics > ratings) {
-            progress_ratings = true;
+        } else if (basics > generic) {
+            change_bool(key, true);
             progress_basics = false;
-            return line_ratings;
+            return line_file;
         } else {
-            progress_ratings = false;
+            change_bool(key, false);
             progress_basics = true;
-            return line_ratings;
+            return line_file;
         }
     }
 
+
+    private void change_bool(String key, Boolean value){
+        if (key.equals("akas")){
+            progress_akas = value;
+        }
+        if (key.equals("ratings")){
+            progress_ratings = value;
+        }
+    }
 
     public static int toInt(String value) {
         if (value.trim().contentEquals("\\N")) {
@@ -182,5 +227,17 @@ public class ReaderTSV {
            // System.out.println(value);
             return 0;
         }
+    }
+    //is broken return always false
+        public static Boolean toBool(String value) {
+            if (value.trim().contentEquals("\\N")) {
+                return false;
+            }
+            try {
+                return Boolean.parseBoolean(value.trim());
+            } catch (NumberFormatException e) {
+               // System.out.println(value);
+                return false;
+            }
     }
 }

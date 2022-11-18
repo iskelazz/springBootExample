@@ -100,10 +100,13 @@ public class SearchServiceElastic implements SearchService {
     public void indexDatabase() throws Exception{
         File basics = new File("/Users/alejandrorg/title.basics.tsv");
         File ratings = new File("/Users/alejandrorg/title.ratings.tsv");
-        ReaderTSV reader = new ReaderTSV(basics,ratings);
+        File akas = new File("/Users/alejandrorg/title.akas.tsv");
+        ReaderTSV reader = new ReaderTSV(basics,ratings, akas);
         LinkedList<Movie> bulk = new LinkedList<>();
         System.out.println(reader.extractHeadersBasics());
         System.out.println(reader.extractHeadersRatings());
+        System.out.println(reader.extractHeadersAkas());
+
         while(!reader.getFinished()){ 
             bulk = reader.tsvToMovies();
             elasticClient.bulk(bulk,"simba");
@@ -160,23 +163,24 @@ public class SearchServiceElastic implements SearchService {
     public List<Movie> processParam(String index, String[] genre, Integer minYear, Integer maxYear, 
     Integer minMinutes, Integer maxMinutes, Float minRating, Float maxRating, String type) throws Exception {
         Map<String, Aggregation> map = elasticClient.orderBy("numVotes", SortOrder.Desc);
-        List<Query> List_genre = new LinkedList<>();
+        List<Query> List_queries = new LinkedList<>();
         if (genre != null){
-            List_genre.addAll(genreFilter(index,genre));
+            List_queries.addAll(genreFilter(index,genre));
         }
         if ((maxYear != null)&& (minYear!=null)){
-            List_genre.add(rangeYearFilter(minYear, maxYear));
+            List_queries.add(rangeYearFilter(minYear, maxYear));
         }
         if ((minMinutes!=null)&&(maxMinutes!=null)){
-            List_genre.add(runtimeFilter(minMinutes,maxMinutes));
+            List_queries.add(runtimeFilter(minMinutes,maxMinutes));
         }
         if ((minRating!=null)&&(maxRating!=null)){
-            List_genre.add(averageRatingFilter(minRating,maxRating));
+            List_queries.add(averageRatingFilter(minRating,maxRating));
         }
         if ((type!=null) && ((type.equals("movie")) || (type.equals("tvSeries")))){
-            List_genre.add(typeFilter(type));
+            List_queries.add(typeFilter(type));
         }
-        return elasticClient.throwOrderByQuery(elasticClient.must(List_genre),map, index, "numVotes"); 
+            
+        return elasticClient.throwOrderByQuery(elasticClient.must(List_queries),map, index, "numVotes"); 
     }
     
     

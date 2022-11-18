@@ -36,6 +36,25 @@
     },
     "numVotes": {
       "type" : "integer"
+    },
+    "akas": {
+      "type": "nested",
+      "properties": {
+        "title": {
+          "type": "text",
+          "analyzer": "analyzer_imdb",
+          "search_analyzer": "analyzer_imdb"
+        },
+        "region": {
+          "type": "keyword"
+        },
+        "language": {
+          "type": "keyword"
+        },
+        "isOriginalTitle": {
+          "type": "boolean"
+        }
+      }
     }
   }
 }

@@ -27,4 +27,5 @@ public class Movie {
     private Double averageRating;
     private Integer numVotes;
     private List<Aka> akas;
+    private List<Director> directors;
 }

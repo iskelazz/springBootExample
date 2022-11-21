@@ -18,6 +18,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermsQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermsQueryField;
+import co.elastic.clients.elasticsearch.cat.IndicesResponse;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.FieldValue;
@@ -59,13 +60,30 @@ public class SearchDataAccessImp implements SearchDataAccess{
         }
     }
 
+    //PUT mapping for a index that exists
     @Override
     public void mapping(String index, String mapping) throws Exception {
         InputStream inputMapping = new ByteArrayInputStream(mapping.getBytes()); 
         esClient.indices().putMapping(p -> p.index(index).withJson(inputMapping));    
     }
+    
+    //adds an index to the database (without body)
+    @Override
+    public void putIndex(String index) throws IOException {
+        try {
+            esClient.indices().delete(d -> d.index(index));
+        } catch (Exception e) {
+            
+        }
 
-   
+        esClient.indices().create(c -> c.index(index));
+    }
+
+    @Override
+    public IndicesResponse getIndex() throws ElasticsearchException, IOException{
+        return esClient.cat().indices();
+        //return esClient.cat().indices().toString();
+    }
 
     @Override
     public Query queryTerm(String value, String field) {

@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import co.empathy.academy.demo.Models.Aka;
+import co.empathy.academy.demo.Models.Director;
 import co.empathy.academy.demo.Models.Movie;
 
 public class ReaderTSV {
@@ -19,20 +20,26 @@ public class ReaderTSV {
     private final BufferedReader reader_basics;
     private final BufferedReader reader_ratings;
     private final BufferedReader reader_akas;
+    private final BufferedReader reader_crew;
+
     private boolean progress_ratings;
     private boolean progress_basics;
     private boolean progress_akas;
+    private boolean progress_crew;
+
     private LinkedList<String[]> ratingslist = new LinkedList<>();
     private LinkedList<String[]> akaslist = new LinkedList<>();
+    private LinkedList<String[]> crewlist = new LinkedList<>();
 
 
     
 
-    public ReaderTSV(File basics, File ratings, File akas) {
+    public ReaderTSV(File basics, File ratings, File akas, File crew) {
         try {
             this.reader_basics = new BufferedReader(new InputStreamReader(new FileInputStream(basics)));
             this.reader_ratings = new BufferedReader(new InputStreamReader(new FileInputStream(ratings)));
             this.reader_akas = new BufferedReader(new InputStreamReader(new FileInputStream(akas)));
+            this.reader_crew = new BufferedReader(new InputStreamReader(new FileInputStream(crew)));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -53,17 +60,27 @@ public class ReaderTSV {
         return Headers;
     }
 
+    public String extractHeadersCrew() throws IOException{
+        String Headers = reader_crew.readLine();
+        return Headers;
+    }
+
     public LinkedList<Movie> tsvToMovies() throws IOException{
         Integer numberRow = 0;
+
         String line_ratings=null;
         String line_basics = null;
         String line_akas = null;
+        String line_crew = null;
+
         progress_basics = true;
         progress_ratings = true;
         progress_akas = true;
+        progress_crew = true;
+
         isfinished = false;
         LinkedList<Movie> results = new LinkedList<>();
-        while (numberRow<20000 || progress_basics == false || progress_ratings == false || progress_akas==false){
+        while (numberRow<20000 || progress_basics == false || progress_ratings == false || progress_akas==false || progress_crew == false){
             String rating = null;
             String numVotes = null;
             if (progress_basics){
@@ -78,7 +95,12 @@ public class ReaderTSV {
                 line_akas = null;
                 line_akas = reader_akas.readLine();
             }
-            if (line_basics == null || line_ratings == null || line_akas == null) {
+            if (progress_crew){
+                line_crew = null;
+                line_crew = reader_crew.readLine();
+            }
+
+            if (line_basics == null || line_ratings == null || line_akas == null || line_crew == null) {
                 isfinished = true;
                 break;
             }
@@ -87,7 +109,9 @@ public class ReaderTSV {
             line_ratings = findIDGenerics(basics_tsv[0], line_ratings, numberRow, ratingslist, "ratings", reader_ratings);
             if (progress_basics) line_akas = findIDGenerics(basics_tsv[0], line_akas, numberRow, akaslist, "akas", reader_akas);
             else progress_akas=false;
-            if (progress_basics && progress_ratings && progress_akas){
+            if (progress_basics) line_crew = findIDGenerics(basics_tsv[0], line_crew, numberRow, crewlist, "crew", reader_crew);
+            else progress_crew=false;
+            if (progress_basics && progress_ratings && progress_akas && progress_crew){
                 String [] last_rating = line_ratings.split("\t");
                 if (last_rating[0].equals(basics_tsv[0])){
                     rating = last_rating[1];
@@ -104,10 +128,21 @@ public class ReaderTSV {
                         index_aka.add(result);
                     }
                 }
+                List<Director> index_crew = new LinkedList<>();
+                for (String [] crw : crewlist) {
+                    if (crw[0].equals(basics_tsv[0])){
+                        List<String>Director_string = Arrays.asList(crw[1].split(","));
+                        for (int i = 0; Director_string.size()>i; i++){
+                            Director director = new Director(Director_string.get(i));
+                            index_crew.add(director);
+                        }
+                        break;
+                    }
+                }
                 if (basics_tsv[4].equals("0")){
                     List<String> genre = Arrays.asList(basics_tsv[8].split(","));
                     Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, toInt(basics_tsv[5]), 
-                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes),index_aka);
+                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes),index_aka,index_crew);
                     //System.out.println(movie.toString());
                     results.add(movie);
                     numberRow++;
@@ -133,11 +168,22 @@ public class ReaderTSV {
                         //akaslist.remove(ak); 
                     }
                 }
+                List<Director> index_crew = new LinkedList<>();
+                for (String [] crw : crewlist) {
+                    if (crw[0].equals(basics_tsv[0])){
+                        List<String>Director_string = Arrays.asList(crw[1].split(","));
+                        for (int i = 0; Director_string.size()>i; i++){
+                            Director director = new Director(Director_string.get(i));
+                            index_crew.add(director);
+                        }
+                        break;
+                    }
+                }
                 //System.out.println(index_aka.toString());
                 if (basics_tsv[4].equals("0")){
                     List<String> genre = Arrays.asList(basics_tsv[8].split(","));
                     Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, toInt(basics_tsv[5]), 
-                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes),index_aka);
+                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes),index_aka,index_crew);
                     //System.out.println(movie.toString());
                     results.add(movie);
                     numberRow++;
@@ -198,6 +244,9 @@ public class ReaderTSV {
         if (key.equals("akas")){
             progress_akas = value;
         }
+        if (key.equals("crew")){
+            progress_crew = value;
+        }
         if (key.equals("ratings")){
             progress_ratings = value;
         }
@@ -228,13 +277,14 @@ public class ReaderTSV {
             return 0;
         }
     }
-    //is broken return always false
-        public static Boolean toBool(String value) {
+
+    public static Boolean toBool(String value) {
             if (value.trim().contentEquals("\\N")) {
                 return false;
             }
             try {
-                return Boolean.parseBoolean(value.trim());
+                if (value.equals("1")) return true;
+                else return false;
             } catch (NumberFormatException e) {
                // System.out.println(value);
                 return false;

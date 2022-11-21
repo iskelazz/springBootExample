@@ -52,35 +52,7 @@ class SearchServiceControllerTest {
         assertTrue(queryResults == "\"tagline\": \"You Know, for Search\"");
     }
 
-    @Test
-    void givenQueryWithResults_whengetIndex_thenReturnString() throws Exception {
-        SearchService searchService = mock(SearchService.class);
-        given(searchService.getIndex()).willReturn("\"tagline\": \"You Know, for Search\"");
-        SearchController searchController = new SearchController(searchService);
-        String queryResults = searchController.getIndex();
-        assertTrue(queryResults == "\"tagline\": \"You Know, for Search\"");
-    }
 
-    @Test
-    void givenQueryWithResults_whenputIndex_thenReturnString() throws Exception {
-        String index = "samples";
-        SearchService searchService = mock(SearchService.class);
-        given(searchService.putIndex(index)).willReturn("{\"acknowledged\": \"true\"}");
-        SearchController searchController = new SearchController(searchService);
-        String queryResults = searchController.putIndex(index,null);
-        assertTrue(queryResults == "{\"acknowledged\": \"true\"}");
-    }
-
-    @Test
-    void givenQueryWithResults_whenputIndexwithBody_thenReturnString() throws Exception {
-        String index = "samples";
-        String body = "{\"colors\":\"grey\"}";
-        SearchService searchService = mock(SearchService.class);
-        given(searchService.putIndex(index,body)).willReturn("{\"shards_acknowledged\": \"true\"}");
-        SearchController searchController = new SearchController(searchService);
-        String queryResults = searchController.putIndex(index,body);
-        assertTrue(queryResults == "{\"shards_acknowledged\": \"true\"}");
-    }
   /*   @Test
     void givenQueryWithResults_whenpostDocuments_thenReturnString() throws Exception {
         String index = "samples";

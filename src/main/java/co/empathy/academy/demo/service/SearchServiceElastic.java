@@ -12,6 +12,7 @@ import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.cat.IndicesResponse;
 import co.empathy.academy.demo.DAOs.SearchDataAccess;
 import co.empathy.academy.demo.Models.Movie;
 import co.empathy.academy.demo.util.ReaderTSV;
@@ -64,17 +65,14 @@ public class SearchServiceElastic implements SearchService {
         return elasticEngine.getVersion();
     }
     @Override
-    public String getIndex() throws Exception {
-        return elasticEngine.getIndex();
+    public IndicesResponse getIndex() throws Exception {
+        return elasticClient.getIndex();
     }
     @Override
-    public String putIndex(String index) throws Exception {
-        return elasticEngine.putIndex(index);
+    public void putIndex(String index) throws Exception {
+        elasticClient.putIndex(index);
     }
-    @Override
-    public String putIndex(String index, String body) throws Exception {
-        return elasticEngine.putIndex(index, body);
-    }
+   
     @Override
     public String postDocuments(String index, Movie body) throws Exception {
         return elasticEngine.addDocument(index,body);
@@ -101,11 +99,14 @@ public class SearchServiceElastic implements SearchService {
         File basics = new File("/Users/alejandrorg/title.basics.tsv");
         File ratings = new File("/Users/alejandrorg/title.ratings.tsv");
         File akas = new File("/Users/alejandrorg/title.akas.tsv");
-        ReaderTSV reader = new ReaderTSV(basics,ratings, akas);
+        File crew = new File("/Users/alejandrorg/title.crew.tsv");
+        ReaderTSV reader = new ReaderTSV(basics,ratings, akas, crew);
         LinkedList<Movie> bulk = new LinkedList<>();
         System.out.println(reader.extractHeadersBasics());
         System.out.println(reader.extractHeadersRatings());
         System.out.println(reader.extractHeadersAkas());
+        System.out.println(reader.extractHeadersCrew());
+
 
         while(!reader.getFinished()){ 
             bulk = reader.tsvToMovies();

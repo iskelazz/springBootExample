@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import co.empathy.academy.demo.Models.Aka;
+import co.empathy.academy.demo.Models.Director;
 import co.empathy.academy.demo.Models.Movie;
 
 public class JsonConversor {
@@ -15,7 +16,7 @@ public class JsonConversor {
         LinkedList<String> genre = new LinkedList<>();
         JSONArray subItemArray;
         JSONArray akaArray = json.optJSONArray("akas");
-
+        JSONArray directorArray = json.optJSONArray("directors");
         subItemArray = json.optJSONArray("genre");
         if (null != subItemArray) {
             for (int j = 0; j < subItemArray.length(); j++) {
@@ -36,7 +37,8 @@ public class JsonConversor {
                 genre,
                 json.optDouble("averageRating"),
                 json.optInt("numVotes"),
-                jsontoAka(akaArray)
+                jsontoAka(akaArray),
+                jsontoDirector(directorArray)
         );
     }
 
@@ -46,10 +48,13 @@ public class JsonConversor {
         LinkedList<Movie> result = new LinkedList<>();
         JSONArray subItemArray;
         JSONArray akaArray;
+        JSONArray directorArray;
+
         for (int i = 0; i < data.length(); i++) {
             JSONObject json = data.getJSONObject(i);
             subItemArray = json.optJSONArray("genre");
             akaArray = json.optJSONArray("akas");
+            directorArray = json.optJSONArray("directors");
             LinkedList<String> genre = new LinkedList<>();
 
             if (null != subItemArray) {
@@ -71,7 +76,8 @@ public class JsonConversor {
                 genre,
                 json.optDouble("averageRating"),
                 json.optInt("numVotes"),
-                jsontoAka(akaArray)
+                jsontoAka(akaArray),
+                jsontoDirector(directorArray)
             );
             result.add(castor);
         }
@@ -92,6 +98,19 @@ public class JsonConversor {
         }
         return result;
     }    
+
+    public static List<Director> jsontoDirector(JSONArray data){
+        List<Director> result = new LinkedList<>();
+        for (int i = 0; i < data.length(); i++) {
+            JSONObject json = data.getJSONObject(i);
+            Director director = new Director (
+                json.optString("nconst")
+            );
+            result.add(director);
+        }
+        return result;
+    }    
+
     //less the genre list. No used yet
     public static JSONObject movietoJSON (Movie movie){
         return new JSONObject()

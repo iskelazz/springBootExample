@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch.cat.IndicesResponse;
 import co.empathy.academy.demo.Models.Movie;
 
 public interface SearchService {
@@ -14,9 +15,8 @@ public interface SearchService {
     List<Movie> queryTermSearch (String query, String field, String index) throws ElasticsearchException, IOException;
     List<Movie> queryTermsSearch(String query[], String field, String index) throws ElasticsearchException, IOException;
     String getVersion() throws Exception;
-    String getIndex() throws Exception;
-    String putIndex(String index) throws Exception;
-    String putIndex(String index, String body) throws Exception;
+    IndicesResponse getIndex() throws Exception;
+    void putIndex(String index) throws Exception;
     String postDocuments(String index, Movie body) throws Exception;
     String postDocuments(String index, String id, String body) throws Exception;
     

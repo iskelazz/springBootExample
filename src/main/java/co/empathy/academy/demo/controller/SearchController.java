@@ -67,18 +67,16 @@ public class SearchController {
 
     //Gets all the indexes of the database
     @GetMapping("/_cat/indices")
-    public String getIndex() throws Exception{
-        return searchservice.getIndex();
+    public ResponseEntity<String> getIndex() throws Exception{
+        return ResponseEntity.created(null).body(searchservice.getIndex().toString());
     }
-    
+
     //add a new index
     @PutMapping("/{index}")
-    public String putIndex(@PathVariable String index, @RequestBody(required = false) String body) throws Exception{
-        if (body == null){
-            return searchservice.putIndex(index);
-        } else{
-            return searchservice.putIndex(index, body);
-        }
+    public ResponseEntity<String> putIndex(@PathVariable String index, @RequestBody(required = false) String body) throws Exception{
+       
+            searchservice.putIndex(index);
+            return ResponseEntity.created(null).body(null);
     }
     
     @PutMapping(value="/{index}/mapping", consumes = "application/json", produces = "application/json")

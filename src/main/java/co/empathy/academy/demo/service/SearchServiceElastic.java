@@ -12,6 +12,7 @@ import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.cat.IndicesResponse;
 import co.empathy.academy.demo.DAOs.SearchDataAccess;
 import co.empathy.academy.demo.Models.Movie;
 import co.empathy.academy.demo.util.ReaderTSV;
@@ -64,17 +65,14 @@ public class SearchServiceElastic implements SearchService {
         return elasticEngine.getVersion();
     }
     @Override
-    public String getIndex() throws Exception {
-        return elasticEngine.getIndex();
+    public IndicesResponse getIndex() throws Exception {
+        return elasticClient.getIndex();
     }
     @Override
-    public String putIndex(String index) throws Exception {
-        return elasticEngine.putIndex(index);
+    public void putIndex(String index) throws Exception {
+        elasticClient.putIndex(index);
     }
-    @Override
-    public String putIndex(String index, String body) throws Exception {
-        return elasticEngine.putIndex(index, body);
-    }
+   
     @Override
     public String postDocuments(String index, Movie body) throws Exception {
         return elasticEngine.addDocument(index,body);
@@ -100,10 +98,16 @@ public class SearchServiceElastic implements SearchService {
     public void indexDatabase() throws Exception{
         File basics = new File("/Users/alejandrorg/title.basics.tsv");
         File ratings = new File("/Users/alejandrorg/title.ratings.tsv");
-        ReaderTSV reader = new ReaderTSV(basics,ratings);
+        File akas = new File("/Users/alejandrorg/title.akas.tsv");
+        File crew = new File("/Users/alejandrorg/title.crew.tsv");
+        ReaderTSV reader = new ReaderTSV(basics,ratings, akas, crew);
         LinkedList<Movie> bulk = new LinkedList<>();
         System.out.println(reader.extractHeadersBasics());
         System.out.println(reader.extractHeadersRatings());
+        System.out.println(reader.extractHeadersAkas());
+        System.out.println(reader.extractHeadersCrew());
+
+
         while(!reader.getFinished()){ 
             bulk = reader.tsvToMovies();
             elasticClient.bulk(bulk,"simba");
@@ -160,23 +164,24 @@ public class SearchServiceElastic implements SearchService {
     public List<Movie> processParam(String index, String[] genre, Integer minYear, Integer maxYear, 
     Integer minMinutes, Integer maxMinutes, Float minRating, Float maxRating, String type) throws Exception {
         Map<String, Aggregation> map = elasticClient.orderBy("numVotes", SortOrder.Desc);
-        List<Query> List_genre = new LinkedList<>();
+        List<Query> List_queries = new LinkedList<>();
         if (genre != null){
-            List_genre.addAll(genreFilter(index,genre));
+            List_queries.addAll(genreFilter(index,genre));
         }
         if ((maxYear != null)&& (minYear!=null)){
-            List_genre.add(rangeYearFilter(minYear, maxYear));
+            List_queries.add(rangeYearFilter(minYear, maxYear));
         }
         if ((minMinutes!=null)&&(maxMinutes!=null)){
-            List_genre.add(runtimeFilter(minMinutes,maxMinutes));
+            List_queries.add(runtimeFilter(minMinutes,maxMinutes));
         }
         if ((minRating!=null)&&(maxRating!=null)){
-            List_genre.add(averageRatingFilter(minRating,maxRating));
+            List_queries.add(averageRatingFilter(minRating,maxRating));
         }
         if ((type!=null) && ((type.equals("movie")) || (type.equals("tvSeries")))){
-            List_genre.add(typeFilter(type));
+            List_queries.add(typeFilter(type));
         }
-        return elasticClient.throwOrderByQuery(elasticClient.must(List_genre),map, index, "numVotes"); 
+            
+        return elasticClient.throwOrderByQuery(elasticClient.must(List_queries),map, index, "numVotes"); 
     }
     
     

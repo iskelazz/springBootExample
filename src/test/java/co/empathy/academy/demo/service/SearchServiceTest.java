@@ -55,38 +55,6 @@ class SearchServiceTest {
         assertTrue(queryResults == "{\"source\": {\"peli\":\"All quiet on the western front\"}}");
     }
 
-    @Test
-    void givenQueryWithResults_whengetIndex_thenReturnString() throws Exception {
-        SearchEngine searchEngine = mock(SearchEngine.class);
-        given(searchEngine.getIndex()).willReturn("\"tagline\": \"You Know, for Search\"");
-        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
-        SearchService searchService = new SearchServiceElastic(searchEngine, Searchclient);
-        String queryResults = searchService.getIndex();
-        assertTrue(queryResults == "\"tagline\": \"You Know, for Search\"");
-    }
-
-    @Test
-    void givenQueryWithResults_whenputIndex_thenReturnString() throws Exception {
-        String index = "samples";
-        SearchEngine searchEngine = mock(SearchEngine.class);
-        given(searchEngine.putIndex(index)).willReturn("{\"acknowledged\": \"true\"}");
-        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
-        SearchService searchService = new SearchServiceElastic(searchEngine, Searchclient);
-        String queryResults = searchService.putIndex(index);
-        assertTrue(queryResults == "{\"acknowledged\": \"true\"}");
-    }
-
-    @Test
-    void givenQueryWithResults_whenputIndexwithBody_thenReturnString() throws Exception {
-        String index = "samples";
-        String body = "{\"colors\":\"grey\"}";
-        SearchEngine searchEngine = mock(SearchEngine.class);
-        given(searchEngine.putIndex(index,body)).willReturn("{\"shards_acknowledged\": \"true\"}");
-        SearchDataAccess Searchclient = mock(SearchDataAccess.class);
-        SearchService searchService = new SearchServiceElastic(searchEngine, Searchclient);
-        String queryResults = searchService.putIndex(index,body);
-        assertTrue(queryResults == "{\"shards_acknowledged\": \"true\"}");
-    }
    
    /*  @Test
     void givenQueryWithResults_whenpostDocuments_thenReturnString() throws Exception {

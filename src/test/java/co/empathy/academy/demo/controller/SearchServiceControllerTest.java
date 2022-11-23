@@ -27,20 +27,6 @@ class SearchServiceControllerTest {
     }
 
     @Test
-    void givenQueryWithResults_whenSearchbody_thenReturnString() throws Exception {
-        String index = "croma";
-        String body = "{\"peli\": \"all quiet on the\"}";
-        SearchService searchService = mock(SearchService.class);
-        given(searchService.search(index,body)).willReturn("{\"source\": {\"peli\":\"All quiet on the western front\"}}");
-
-        SearchController searchController = new SearchController(searchService);
-
-        String queryResults = searchController.search(index,body);
-
-        assertTrue(queryResults == "{\"source\": {\"peli\":\"All quiet on the western front\"}}");
-    }
-
-    @Test
     void givenQueryWithResults_whengetVersion_thenReturnString() throws Exception {
         SearchService searchService = mock(SearchService.class);
         given(searchService.getVersion()).willReturn("\"tagline\": \"You Know, for Search\"");
@@ -64,18 +50,6 @@ class SearchServiceControllerTest {
         assertTrue(queryResults == "{\"result\": \"created\"}");
     }*/
     
-    @Test
-    void givenQueryWithResults_whenpostDocumentswithId_thenReturnString() throws Exception {
-        String index = "samples";
-        String body = "{\"peli\":\"Ant-man\"}";
-        String id = "14";
-        SearchService searchService = mock(SearchService.class);
-        given(searchService.postDocuments(index,body,id)).willReturn("{\"result\": \"created\"}");
-        SearchController searchController = new SearchController(searchService);
-        String queryResults = searchController.postDocuments(index,body,id);
-        assertTrue(queryResults == "{\"result\": \"created\"}");
-    }
-
     @Test
     void givenNoQuery_whenSearch_thenPropagateError() throws Exception {
         SearchService searchService = mock(SearchService.class);

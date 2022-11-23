@@ -100,12 +100,14 @@ public class SearchServiceElastic implements SearchService {
         File ratings = new File("/Users/alejandrorg/title.ratings.tsv");
         File akas = new File("/Users/alejandrorg/title.akas.tsv");
         File crew = new File("/Users/alejandrorg/title.crew.tsv");
-        ReaderTSV reader = new ReaderTSV(basics,ratings, akas, crew);
+        File principals = new File("/Users/alejandrorg/title.principals.tsv");
+        ReaderTSV reader = new ReaderTSV(basics,ratings, akas, crew, principals);
         LinkedList<Movie> bulk = new LinkedList<>();
         System.out.println(reader.extractHeadersBasics());
         System.out.println(reader.extractHeadersRatings());
         System.out.println(reader.extractHeadersAkas());
         System.out.println(reader.extractHeadersCrew());
+        System.out.println(reader.extractHeadersPrincipals());
 
 
         while(!reader.getFinished()){ 

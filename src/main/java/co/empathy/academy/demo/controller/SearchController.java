@@ -3,7 +3,6 @@ package co.empathy.academy.demo.controller;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,11 +20,13 @@ import org.springframework.web.server.ResponseStatusException;
 import co.empathy.academy.demo.util.JsonConversor;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.empathy.academy.demo.Models.Movie;
+import co.empathy.academy.demo.Models.hits;
 import co.empathy.academy.demo.service.SearchService;
 
 @RestController
 public class SearchController {
     
+    private static final String INDEX = "simba";
     @Autowired
     private SearchService searchservice;
 
@@ -38,25 +39,19 @@ public class SearchController {
 		  return searchservice.search(query);
     }
 
-     //Performs search in elasticSearch database in form "localhost:8080/search?query=example"
-     @GetMapping("/{index}/search")
-     public String search(@PathVariable String index, @RequestBody String body) throws Exception{
-           return searchservice.search(index, body);
-     }
-
-     @GetMapping("/{index}/search/_multi")
-     public ResponseEntity<List<Movie>> multiMatchSearch(@PathVariable String index, @RequestParam("query") String query, @RequestParam("fields") String fields) throws ElasticsearchException, IOException {
-        return ResponseEntity.ok().body(searchservice.multiMatchSearch(query, fields,index));
+     @GetMapping("/search/_multi")
+     public ResponseEntity<List<Movie>> multiMatchSearch(@RequestParam("query") String query, @RequestParam("fields") String fields) throws ElasticsearchException, IOException {
+        return ResponseEntity.ok().body(searchservice.multiMatchSearch(query, fields,INDEX));
     }
 
-     @GetMapping(value="/{index}/search/_term", produces="application/json")
-     public ResponseEntity<List<Movie>> searchByTerm (@PathVariable String index, @RequestParam(name="query") String query  ,@RequestParam(name="field") String field) throws ElasticsearchException, IOException{
-        return ResponseEntity.ok().body(searchservice.queryTermSearch(query, field, index));
+     @GetMapping(value="/search/_term", produces="application/json")
+     public ResponseEntity<List<Movie>> searchByTerm (@RequestParam(name="query") String query  ,@RequestParam(name="field") String field) throws ElasticsearchException, IOException{
+        return ResponseEntity.ok().body(searchservice.queryTermSearch(query, field, INDEX));
      }
 
-     @GetMapping("/{index}/search/_terms")
-     public ResponseEntity<List<Movie>> searchByTerms (@PathVariable String index, @RequestParam(name="query") String query [] ,@RequestParam(name="field") String field) throws ElasticsearchException, IOException{
-        return ResponseEntity.ok().body(searchservice.queryTermsSearch(query, field, index));
+     @GetMapping("/search/_terms")
+     public ResponseEntity<List<Movie>> searchByTerms (@RequestParam(name="query") String query [] ,@RequestParam(name="field") String field) throws ElasticsearchException, IOException{
+        return ResponseEntity.ok().body(searchservice.queryTermsSearch(query, field, INDEX));
      }
 
     //Get status elasticSearch database in form "localhost:8080"
@@ -79,10 +74,10 @@ public class SearchController {
             return ResponseEntity.created(null).body(null);
     }
     
-    @PutMapping(value="/{index}/mapping", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<JSONObject> mapping(@PathVariable String index, @RequestBody String body) throws IOException{
+    @PutMapping(value="/mapping", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<JSONObject> mapping( @RequestBody String body) throws IOException{
         try {
-            searchservice.mapping(index,body);
+            searchservice.mapping(INDEX,body);
         } catch (Exception e) {
             e.printStackTrace();
             throw new ResponseStatusException(
@@ -91,10 +86,10 @@ public class SearchController {
         return ResponseEntity.created(null).body(null);
     }
 
-    @PutMapping(value="/{index}/analyzer", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<JSONObject> analyzer(@PathVariable String index, @RequestBody String body) throws IOException{
+    @PutMapping(value="/analyzer", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<JSONObject> analyzer(@RequestBody String body) throws IOException{
         try {
-            searchservice.analyzer(index,body);
+            searchservice.analyzer(INDEX,body);
         } catch (Exception e) {
             e.printStackTrace();
             throw new ResponseStatusException(
@@ -104,10 +99,10 @@ public class SearchController {
     }
 
 
-    @PostMapping(value = "/{index}/_doc", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<JSONObject> postDocuments(@PathVariable String index, @RequestBody Movie body) throws Exception{
+    @PostMapping(value = "/_doc", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<JSONObject> postDocuments(@RequestBody Movie body) throws Exception{
         try {
-            searchservice.postDocuments(index,body);
+            searchservice.postDocuments(INDEX,body);
         } catch (Exception e) {
             e.printStackTrace();
             throw new ResponseStatusException(
@@ -117,34 +112,34 @@ public class SearchController {
     }
     
     //add documents in the {index} with {id}
-    @PostMapping("/{index}/_doc/{id}")
-    public String postDocuments(@PathVariable String index,@PathVariable String id, @RequestBody String body) throws Exception{
-        return searchservice.postDocuments(index,id, body);
+    @PostMapping("/_doc/{id}")
+    public String postDocuments(@PathVariable String id, @RequestBody String body) throws Exception{
+        return searchservice.postDocuments(INDEX,id, body);
     }
 
-
+    //Builds database with the documents specified in the service
     @PostMapping("/database")
     public ResponseEntity<String> indexImdbData() throws Exception {
         searchservice.indexDatabase();
         return ResponseEntity.accepted().build();
     }
 
-    @GetMapping("/{index}/max_rating")
-    public ResponseEntity<List<Movie>> maxAverageRating(@PathVariable String index) throws Exception{
-        List<Movie>body = searchservice.maxAverageRating(index);
+    @GetMapping("/max_rating")
+    public ResponseEntity<List<Movie>> maxAverageRating() throws Exception{
+        List<Movie>body = searchservice.maxAverageRating(INDEX);
         return ResponseEntity.created(null).body(body);
     }
 
-    @GetMapping("/{index}/min_rating")
-    public ResponseEntity<List<Movie>> minAverageRating(@PathVariable String index) throws Exception{
-        List<Movie>body = searchservice.minAverageRating(index);
+    @GetMapping("/min_rating")
+    public ResponseEntity<List<Movie>> minAverageRating() throws Exception{
+        List<Movie>body = searchservice.minAverageRating(INDEX);
         return ResponseEntity.created(null).body(body);
     }
     
 
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Movie>> search(
+    @GetMapping("/search/")
+    public ResponseEntity <hits> search(
         @Nullable @RequestParam(name="genre") String [] genre,
 
         @Nullable @RequestParam(name="minyear") Integer minYear,
@@ -160,7 +155,8 @@ public class SearchController {
     ) throws Exception{
         List<Movie>body = searchservice.processParam("simba",genre,minYear,maxYear,minMinutes,maxMinutes
             ,minScore,maxScore,type);
-        return ResponseEntity.created(null).body(body);
+        hits hits = new hits(body);
+        return ResponseEntity.created(null).body(hits);
     }
 
 }

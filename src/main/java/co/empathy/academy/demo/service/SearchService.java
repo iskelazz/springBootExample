@@ -22,7 +22,7 @@ public interface SearchService {
     
     //processing
     List<Movie> processParam(String index, String[] genre, Integer maxYear, Integer minYear,
-        Integer minMinutes, Integer maxMinutes,Float minRating, Float maxRating,String type) throws Exception;
+        Integer minMinutes, Integer maxMinutes,Float minRating, Float maxRating,String type, Integer nhits) throws Exception;
 
     //Settings
     void mapping(String index, String mapping) throws Exception;

@@ -211,10 +211,10 @@ public class SearchDataAccessImp implements SearchDataAccess{
     
     //In the future size by parameter, meanwhile it value will be 25
     @Override
-    public Map<String, Aggregation> orderBy(String key, SortOrder sort){
+    public Map<String, Aggregation> orderBy(String key, SortOrder sort, int nhits){
         Map<String, Aggregation> map = new HashMap<String, Aggregation>();
         FieldSort order = FieldSort.of(h -> h.field(key).order(sort));
-        Aggregation aggregate = TopHitsAggregation.of(t -> t.size(25).sort(SortOptions.of(h -> h.field(order))))._toAggregation();
+        Aggregation aggregate = TopHitsAggregation.of(t -> t.size(nhits).sort(SortOptions.of(h -> h.field(order))))._toAggregation();
         map.put(key, aggregate);
         return map;
     }

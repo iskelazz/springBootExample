@@ -142,19 +142,20 @@ public class SearchController {
     public ResponseEntity <hits> search(
         @Nullable @RequestParam(name="genre") String [] genre,
 
-        @Nullable @RequestParam(name="minyear") Integer minYear,
-        @Nullable @RequestParam(name="maxyear") Integer maxYear,
+        @Nullable @RequestParam(name="minYear") Integer minYear,
+        @Nullable @RequestParam(name="maxYear") Integer maxYear,
 
-        @Nullable @RequestParam(name="minminutes") Integer minMinutes,
-        @Nullable @RequestParam(name="maxminutes") Integer maxMinutes,
+        @Nullable @RequestParam(name="minMinutes") Integer minMinutes,
+        @Nullable @RequestParam(name="maxMinutes") Integer maxMinutes,
 
-        @Nullable @RequestParam(name="minscore") Float minScore,
-        @Nullable @RequestParam(name="maxscore") Float maxScore,
+        @Nullable @RequestParam(name="minScore") Float minScore,
+        @Nullable @RequestParam(name="maxScore") Float maxScore,
 
-        @Nullable @RequestParam(name="type") String type
+        @Nullable @RequestParam(name="type") String type,
+        @Nullable @RequestParam(name="maxNHits") Integer nhits
     ) throws Exception{
         List<Movie>body = searchservice.processParam("simba",genre,minYear,maxYear,minMinutes,maxMinutes
-            ,minScore,maxScore,type);
+            ,minScore,maxScore,type,nhits);
         hits hits = new hits(body);
         return ResponseEntity.created(null).body(hits);
     }

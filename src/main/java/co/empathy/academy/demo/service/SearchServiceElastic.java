@@ -26,6 +26,8 @@ import co.empathy.academy.demo.util.Validator;
 public class SearchServiceElastic implements SearchService {
 
     private static final int INT_MAX = 2000000000;
+    private static final int MAX_VALUE_QUERY = 999999;
+
     @Autowired
     private SearchEngine elasticEngine;
     private SearchDataAccess elasticClient; 
@@ -128,13 +130,13 @@ public class SearchServiceElastic implements SearchService {
 
     @Override
     public List<Movie> maxAverageRating (String index) throws ElasticsearchException, IOException{
-        Map<String, Aggregation> map = elasticClient.orderBy("averageRating", SortOrder.Desc);
+        Map<String, Aggregation> map = elasticClient.orderBy("averageRating", SortOrder.Desc,25);
         return elasticClient.throwOrderByQuery(elasticClient.numericFilter("numVotes",30000,INT_MAX),map, index, "averageRating");
     }
 
     @Override
     public List<Movie> minAverageRating (String index) throws ElasticsearchException, IOException{
-        Map<String, Aggregation> map = elasticClient.orderBy("averageRating", SortOrder.Asc);
+        Map<String, Aggregation> map = elasticClient.orderBy("averageRating", SortOrder.Asc,25);
         return elasticClient.throwOrderByQuery(elasticClient.numericFilter("numVotes",30000,INT_MAX,0.1),map, index, "averageRating");
     }
 
@@ -146,15 +148,22 @@ public class SearchServiceElastic implements SearchService {
         return List_genre;
     }
 
-    public Query rangeYearFilter (int minYear, int maxYear) throws Exception {
+    public Query rangeYearFilter (Integer minYear, Integer maxYear) throws Exception {
+        if (minYear == null) minYear = 1;
+        if (maxYear == null) maxYear = MAX_VALUE_QUERY;
         return elasticClient.numericFilter("startYear",minYear,maxYear);
     }
     
-    public Query runtimeFilter (int minValue, int maxValue) throws Exception {
+    public Query runtimeFilter (Integer minValue, Integer maxValue) throws Exception {
+        if (minValue == null) minValue = 0;
+        if (maxValue == null) maxValue = MAX_VALUE_QUERY;
         return elasticClient.numericFilter("runtimesMinutes",minValue,maxValue);
     }
 
-    public Query averageRatingFilter (double minRating, double maxRating) throws Exception {
+    public Query averageRatingFilter (Float minRating, Float maxRating) throws Exception {
+        if (minRating == null) minRating = 0f;
+        if (maxRating == null) maxRating = 10f;
+
         return elasticClient.numericFilter("averageRating",minRating,maxRating);
     }
 
@@ -164,19 +173,23 @@ public class SearchServiceElastic implements SearchService {
 
     @Override
     public List<Movie> processParam(String index, String[] genre, Integer minYear, Integer maxYear, 
-    Integer minMinutes, Integer maxMinutes, Float minRating, Float maxRating, String type) throws Exception {
-        Map<String, Aggregation> map = elasticClient.orderBy("numVotes", SortOrder.Desc);
+    Integer minMinutes, Integer maxMinutes, Float minRating, Float maxRating, String type, Integer nhits) throws Exception {
+        Map<String, Aggregation> map;
+        if (nhits != null) map = elasticClient.orderBy("numVotes", SortOrder.Desc,nhits);
+        else map = elasticClient.orderBy("numVotes", SortOrder.Desc,100);
+        
+        
         List<Query> List_queries = new LinkedList<>();
         if (genre != null){
             List_queries.addAll(genreFilter(index,genre));
         }
-        if ((maxYear != null)&& (minYear!=null)){
+        if ((maxYear != null) || (minYear!=null)){
             List_queries.add(rangeYearFilter(minYear, maxYear));
         }
-        if ((minMinutes!=null)&&(maxMinutes!=null)){
+        if ((minMinutes!=null)||(maxMinutes!=null)){
             List_queries.add(runtimeFilter(minMinutes,maxMinutes));
         }
-        if ((minRating!=null)&&(maxRating!=null)){
+        if ((minRating!=null)||(maxRating!=null)){
             List_queries.add(averageRatingFilter(minRating,maxRating));
         }
         if ((type!=null) && ((type.equals("movie")) || (type.equals("tvSeries")))){

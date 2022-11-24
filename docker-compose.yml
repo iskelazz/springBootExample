@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   elasticsearch:
-    image: "docker.elastic.co/elasticsearch/elasticsearch:7.17.2"
+    image: "iskelazzz/co.empathy.academy.indexedelastic:lastest"
     hostname: "elasticsearch"
     container_name: elasticsearch-docker
     environment:

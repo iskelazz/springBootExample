@@ -27,6 +27,7 @@ public class SearchServiceElastic implements SearchService {
 
     private static final int INT_MAX = 2000000000;
     private static final int MAX_VALUE_QUERY = 999999;
+    private static final int MIN_VOTES = 15000;
 
     @Autowired
     private SearchEngine elasticEngine;
@@ -166,20 +167,33 @@ public class SearchServiceElastic implements SearchService {
 
         return elasticClient.numericFilter("averageRating",minRating,maxRating);
     }
+    public Query numVotesFilter (Integer minVotes) throws Exception{
+        return elasticClient.numericFilter("numVotes", minVotes);
+    }
 
     public Query typeFilter(String type) throws Exception {
         return elasticClient.queryTerm(type, "titleType");
     }
 
     @Override
-    public List<Movie> processParam(String index, String[] genre, Integer minYear, Integer maxYear, 
+    public List<Movie> processParam(String index, String[] genre, Integer minYear, Integer maxYear, String sortRating,
     Integer minMinutes, Integer maxMinutes, Float minRating, Float maxRating, String type, Integer nhits) throws Exception {
         Map<String, Aggregation> map;
-        if (nhits != null) map = elasticClient.orderBy("numVotes", SortOrder.Desc,nhits);
-        else map = elasticClient.orderBy("numVotes", SortOrder.Desc,100);
-        
-        
         List<Query> List_queries = new LinkedList<>();
+        String key = "numVotes";
+        if (sortRating == null){    
+            if (nhits != null) map = elasticClient.orderBy(key, SortOrder.Desc,nhits);
+            else map = elasticClient.orderBy(key, SortOrder.Desc,100);            
+        }
+        else {
+            key = "averageRating";
+            SortOrder order;
+            if (sortRating.equals("asc")) order = SortOrder.Asc;
+            else order = SortOrder.Desc; 
+            if (nhits != null) map = elasticClient.orderBy(key, order,nhits);
+            else map = elasticClient.orderBy(key, order,10);
+            List_queries.add(numVotesFilter(MIN_VOTES));
+        }
         if (genre != null){
             List_queries.addAll(genreFilter(index,genre));
         }
@@ -196,7 +210,7 @@ public class SearchServiceElastic implements SearchService {
             List_queries.add(typeFilter(type));
         }
             
-        return elasticClient.throwOrderByQuery(elasticClient.must(List_queries),map, index, "numVotes"); 
+        return elasticClient.throwOrderByQuery(elasticClient.must(List_queries),map, index, key); 
     }
     
     

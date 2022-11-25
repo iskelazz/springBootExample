@@ -29,6 +29,7 @@ public interface SearchDataAccess {
     Query numericFilter (String key, int minValue, int maxValue);
     Query numericFilter (String key, double minValue, double maxValue);
     Query numericFilter (String key, int minValue, int maxValue, double minRating);
+    Query numericFilter (String key, Integer minValue);
     Query matchQuery (String match, String field);
     
     Query must (List<Query> queries);

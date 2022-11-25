@@ -21,7 +21,7 @@ public interface SearchService {
     String postDocuments(String index, String id, String body) throws Exception;
     
     //processing
-    List<Movie> processParam(String index, String[] genre, Integer maxYear, Integer minYear,
+    List<Movie> processParam(String index, String[] genre, Integer maxYear, Integer minYear, String sortRating,
         Integer minMinutes, Integer maxMinutes,Float minRating, Float maxRating,String type, Integer nhits) throws Exception;
 
     //Settings

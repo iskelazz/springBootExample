@@ -173,6 +173,15 @@ public class SearchDataAccessImp implements SearchDataAccess{
         return numericFilter;
     }
 
+    //Better use other name for doing it diferent than others numericFilter with range max/min
+    @Override
+    public Query numericFilter (String key, Integer minValue){
+        Query numericFilter = RangeQuery.of(t -> t.field(key)
+            .gte(JsonData.of(minValue)))  
+            ._toQuery();
+        return numericFilter;
+    }
+
     //Numeric filter with rating min
     @Override
     public Query numericFilter (String key, int minValue, int maxValue, double minRating){

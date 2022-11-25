@@ -140,7 +140,7 @@ public class SearchController {
 
     @GetMapping("/search/")
     public ResponseEntity <hits> search(
-        @Nullable @RequestParam(name="genre") String [] genre,
+        @Nullable @RequestParam(name="genres") String [] genre,
 
         @Nullable @RequestParam(name="minYear") Integer minYear,
         @Nullable @RequestParam(name="maxYear") Integer maxYear,
@@ -152,10 +152,11 @@ public class SearchController {
         @Nullable @RequestParam(name="maxScore") Float maxScore,
 
         @Nullable @RequestParam(name="type") String type,
-        @Nullable @RequestParam(name="maxNHits") Integer nhits
+        @Nullable @RequestParam(name="maxNHits") Integer nhits,
+        @Nullable @RequestParam(name="sortRating") String sortRating
     ) throws Exception{
-        List<Movie>body = searchservice.processParam("simba",genre,minYear,maxYear,minMinutes,maxMinutes
-            ,minScore,maxScore,type,nhits);
+        List<Movie>body = searchservice.processParam("simba",genre,minYear,maxYear,sortRating
+        ,minMinutes,maxMinutes,minScore,maxScore,type,nhits);
         hits hits = new hits(body);
         return ResponseEntity.created(null).body(hits);
     }

@@ -18,7 +18,9 @@ public interface SearchDataAccess {
     
     void putIndex(String index) throws IOException;
     IndicesResponse getIndex() throws ElasticsearchException, IOException;
-    
+    void addDocument(String index, Movie body) throws Exception;
+    void addDocument(String index,String id, Movie movie) throws Exception;
+
     Query multiMatchQuery (String query, String[] fields);
     Query queryTerms(String[] values, String field);
     Query queryTerm (String value, String field);

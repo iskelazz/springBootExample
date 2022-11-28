@@ -9,16 +9,15 @@ import co.empathy.academy.demo.Models.Movie;
 
 public interface SearchService {
 
-    String search(String query) throws Exception;
-    String search(String index, String body) throws Exception;
+    List<Movie> search(String query,String index) throws Exception;
     List<Movie> multiMatchSearch(String query, String fields, String index) throws ElasticsearchException, IOException;
     List<Movie> queryTermSearch (String query, String field, String index) throws ElasticsearchException, IOException;
     List<Movie> queryTermsSearch(String query[], String field, String index) throws ElasticsearchException, IOException;
     String getVersion() throws Exception;
     IndicesResponse getIndex() throws Exception;
     void putIndex(String index) throws Exception;
-    String postDocuments(String index, Movie body) throws Exception;
-    String postDocuments(String index, String id, String body) throws Exception;
+    void postDocument(String index, Movie body) throws Exception;
+    void postDocument(String index, String id, Movie body) throws Exception;
     
     //processing
     List<Movie> processParam(String index, String[] genre, Integer maxYear, Integer minYear, String sortRating,

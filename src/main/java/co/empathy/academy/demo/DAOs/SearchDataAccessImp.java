@@ -228,6 +228,24 @@ public class SearchDataAccessImp implements SearchDataAccess{
         return map;
     }
 
+    @Override
+    public void addDocument(String index, Movie movie) throws Exception {
+        esClient.index(i -> i
+                .index(index)
+                .id(movie.getId())
+                .document(movie));
+        
+    }
+
+    @Override
+    public void addDocument(String index,String id, Movie movie) throws Exception {
+        esClient.index(i -> i
+                .index(index)
+                .id(id)
+                .document(movie));
+        
+    }
+
     /* 
     Test with aggregate
     @Override

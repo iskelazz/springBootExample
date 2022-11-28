@@ -76,6 +76,14 @@ public class ReaderTSV {
         return Headers;
     }
 
+    public void extractHeaders() throws IOException{
+        extractHeadersBasics();
+        extractHeadersRatings();
+        extractHeadersAkas();
+        extractHeadersCrew();
+        extractHeadersPrincipals();
+    }
+
     public LinkedList<Movie> tsvToMovies() throws IOException{
         Integer numberRow = 0;
 
@@ -92,6 +100,7 @@ public class ReaderTSV {
         progress_principals = true;
 
         isfinished = false;
+        extractHeaders();
         LinkedList<Movie> results = new LinkedList<>();
         while (numberRow<20000 || progress_basics == false || progress_ratings == false 
             || progress_akas==false || progress_crew == false || progress_principals == false){

@@ -30,3 +30,7 @@ To shut down containers:
    docker-compose down
 
    ```
+
+### API Documentation
+
+http://localhost:8080/swagger-ui/index.html

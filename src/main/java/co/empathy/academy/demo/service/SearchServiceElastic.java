@@ -39,12 +39,8 @@ public class SearchServiceElastic implements SearchService {
     }
     
     @Override
-    public String search(String query) throws Exception {
-        return elasticEngine.search(query);
-    }
-    @Override
-    public String search(String index, String body) throws Exception {
-        return elasticEngine.search(index, body);
+    public List<Movie> search(String query, String index) throws Exception {
+        return elasticClient.throwQuery(elasticClient.matchQuery(query,"originalTitle"), index);
     }
 
     @Override
@@ -77,12 +73,12 @@ public class SearchServiceElastic implements SearchService {
     }
    
     @Override
-    public String postDocuments(String index, Movie body) throws Exception {
-        return elasticEngine.addDocument(index,body);
+    public void postDocument(String index, Movie body) throws Exception {
+        elasticClient.addDocument(index,body);
     }
     @Override
-    public String postDocuments(String index, String id, String body) throws Exception {
-        return elasticEngine.postDocuments(index, id, body);
+    public void postDocument(String index, String id, Movie body) throws Exception {
+        elasticClient.addDocument(index, id, body);
     }
 
     @Override
@@ -106,12 +102,6 @@ public class SearchServiceElastic implements SearchService {
         File principals = new File("/Users/alejandrorg/title.principals.tsv");
         ReaderTSV reader = new ReaderTSV(basics,ratings, akas, crew, principals);
         LinkedList<Movie> bulk = new LinkedList<>();
-        System.out.println(reader.extractHeadersBasics());
-        System.out.println(reader.extractHeadersRatings());
-        System.out.println(reader.extractHeadersAkas());
-        System.out.println(reader.extractHeadersCrew());
-        System.out.println(reader.extractHeadersPrincipals());
-
 
         while(!reader.getFinished()){ 
             bulk = reader.tsvToMovies();

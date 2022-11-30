@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,11 +41,15 @@ public class SearchController {
         @ApiResponse(responseCode = "200", description = "The search process has been successfully completed."),
         @ApiResponse(responseCode = "500", description = "Error in the search process")
     })
-    @GetMapping("/_search")
+    @GetMapping(value = "/_search", produces = "application/json")
     public ResponseEntity <hits> search(@RequestParam(name="query") String query) throws Exception{
-		List<Movie>list_movies = searchservice.search(query,INDEX); 
+	try{	
+        List<Movie>list_movies = searchservice.search(query,INDEX); 
         hits hits = new hits(list_movies);
-        return ResponseEntity.created(null).body(hits);
+        return ResponseEntity.ok(hits);
+    } catch (Exception e){
+        return ResponseEntity.internalServerError().build();   
+    }    
     }
 
     //performs a search by filtering by various parameters
@@ -56,9 +58,13 @@ public class SearchController {
         @ApiResponse(responseCode = "200", description = "The search process has been successfully completed."),
         @ApiResponse(responseCode = "500", description = "Error in the search indices")
     })
-     @GetMapping("/search/_multi")
+     @GetMapping(value = "/search/_multi",produces = "application/json")
      public ResponseEntity<List<Movie>> multiMatchSearch(@RequestParam("query") String query, @RequestParam("fields") String fields) throws ElasticsearchException, IOException {
-        return ResponseEntity.ok().body(searchservice.multiMatchSearch(query, fields,INDEX));
+        try{
+            return ResponseEntity.ok(searchservice.multiMatchSearch(query, fields,INDEX));
+        } catch (Exception e){
+            return ResponseEntity.internalServerError().build();   
+        }    
     }
 
     //performs a search by filtering by a parameter and a field
@@ -69,7 +75,12 @@ public class SearchController {
     })
      @GetMapping(value="/search/_term", produces="application/json")
      public ResponseEntity<List<Movie>> searchByTerm (@RequestParam(name="query") String query  ,@RequestParam(name="field") String field) throws ElasticsearchException, IOException{
-        return ResponseEntity.ok().body(searchservice.queryTermSearch(query, field, INDEX));
+        try{
+            return ResponseEntity.ok(searchservice.queryTermSearch(query, field, INDEX));
+        } catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+
+        }    
      }
 
      //performs a search by filtering by several paremeters and a field
@@ -78,9 +89,13 @@ public class SearchController {
         @ApiResponse(responseCode = "200", description = "The search process has been successfully completed."),
         @ApiResponse(responseCode = "500", description = "Error in the search process")
     })
-     @GetMapping("/search/_terms")
+     @GetMapping(value="/search/_terms", produces = "application/json")
      public ResponseEntity<List<Movie>> searchByTerms (@RequestParam(name="query") String query [] ,@RequestParam(name="field") String field) throws ElasticsearchException, IOException{
-        return ResponseEntity.ok().body(searchservice.queryTermsSearch(query, field, INDEX));
+        try{
+            return ResponseEntity.ok(searchservice.queryTermsSearch(query, field, INDEX));
+        } catch(Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
      }
 
     //Get status elasticSearch database in form "localhost:8080"
@@ -95,44 +110,54 @@ public class SearchController {
         @ApiResponse(responseCode = "200", description = "The indices has been returned."),
         @ApiResponse(responseCode = "500", description = "Error in the search indices")
     })
-    @GetMapping("/_cat/indices")
+    @GetMapping(value = "/_cat/indices", produces = "application/json" )
     public ResponseEntity<String> getIndex() throws Exception{
-        return ResponseEntity.created(null).body(searchservice.getIndex().toString());
+        try{
+            return ResponseEntity.ok(searchservice.getIndex().toString());
+        } catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     //add a new index
     @Operation(summary = "Put a index with a name passed by parameter")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Data accepted"),
-        @ApiResponse(responseCode = "400", description = "Error, index no accepted"),
+        //@ApiResponse(responseCode = "400", description = "Error, index no accepted"),
         @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    @PutMapping("/{index}")
+    @PutMapping(value = "/{index}", produces = "application/json")
     public ResponseEntity<String> putIndex(@PathVariable String index, @RequestBody(required = false) String body) throws Exception{
-       
+        try{
             searchservice.putIndex(index);
-            return ResponseEntity.created(null).body(null);
+            return ResponseEntity.ok(null);
+        } catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     //add a "simba"(INDEX constant) index. This is a pre-builder index for store the imdb database
     @Operation(summary = "Put a predefinided index")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Index accepted"),
-        @ApiResponse(responseCode = "400", description = "Error, index no accepted"),
+        //@ApiResponse(responseCode = "400", description = "Error, index no accepted"),
         @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    @PutMapping("/index")
+    @PutMapping(value = "/index", produces = "application/json")
     public ResponseEntity<String> putIndex() throws Exception{
-       
+        try{
             searchservice.putIndex(INDEX);
-            return ResponseEntity.created(null).body(null);
+            return ResponseEntity.ok(null);
+        } catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
     }
     
     //add analyzer using a body
     @Operation(summary = "Put a mapping by body(postman/insomnia)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Mapping accepted"),
-        @ApiResponse(responseCode = "400", description = "Error, mapping no accepted"),
+        //@ApiResponse(responseCode = "400", description = "Error, mapping no accepted"),
         @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     //add mapping using a body
@@ -140,48 +165,43 @@ public class SearchController {
     public ResponseEntity<JSONObject> mapping( @RequestBody String body) throws IOException{
         try {
             searchservice.mapping(INDEX,body);
+            return ResponseEntity.ok(null);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(
-           HttpStatus.INTERNAL_SERVER_ERROR, "Server not found", e);
+            return ResponseEntity.internalServerError().build(); 
         }
-        return ResponseEntity.created(null).body(null);
     }
 
     //add analyzer using a body
     @Operation(summary = "Put a analyzer by body(postman/insomnia)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Analyzer accepted"),
-        @ApiResponse(responseCode = "400", description = "Error, analyzer no accepted"),
+        //@ApiResponse(responseCode = "400", description = "Error, analyzer no accepted"),
         @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     @PutMapping(value="/analyzer", consumes = "application/json", produces = "application/json")
     public ResponseEntity<JSONObject> analyzer(@RequestBody String body) throws IOException{
         try {
             searchservice.analyzer(INDEX,body);
+            return ResponseEntity.ok(null);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(
-           HttpStatus.INTERNAL_SERVER_ERROR, "Server not found", e);
+            return ResponseEntity.internalServerError().build(); 
         }
-        return ResponseEntity.created(null).body(null);
     }
 
     //add a document 
     @Operation(summary = "Indexing a generic doc in elasticsearch database")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Data accepted"),
-        @ApiResponse(responseCode = "400", description = "Error indexing"),
+        //@ApiResponse(responseCode = "400", description = "Error indexing"),
         @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     @PostMapping(value = "/_doc", consumes = "application/json", produces = "application/json")
-    public void postDocument(@RequestBody Movie body) throws Exception{
+    public ResponseEntity<String> postDocument(@RequestBody Movie body) throws Exception{
         try {
             searchservice.postDocument(INDEX,body);
+            return ResponseEntity.ok(null);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(
-           HttpStatus.INTERNAL_SERVER_ERROR, "Server not found", e);
+            return ResponseEntity.internalServerError().build();
         }
     }
     
@@ -189,32 +209,35 @@ public class SearchController {
     @Operation(summary = "Indexing a generic doc in elasticsearch database, with id passed by parameter")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Data accepted"),
-        @ApiResponse(responseCode = "400", description = "Error indexing"),
+        //@ApiResponse(responseCode = "400", description = "Error indexing"),
         @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     //add documents in the {index} with {id}
-    @PostMapping("/_doc/{id}")
-    public void postDocument(@PathVariable String id, @RequestBody Movie body) throws Exception{
+    @PostMapping(value = "/_doc/{id}",consumes = "application/json", produces = "application/json")
+    public ResponseEntity<String> postDocument(@PathVariable String id, @RequestBody Movie body) throws Exception{
         try {
             searchservice.postDocument(INDEX,id,body);
+            return ResponseEntity.ok(null);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(
-           HttpStatus.INTERNAL_SERVER_ERROR, "Server not found", e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 
     @Operation(summary = "Indexing imdb tsvs in elastic search")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Data accepted"),
-        @ApiResponse(responseCode = "400", description = "Error indexing"),
+        //@ApiResponse(responseCode = "400", description = "Error indexing"),
         @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     //Builds database with the documents specified in the service
-    @PostMapping("/database")
+    @PostMapping(value = "/database", produces = "application/json")
     public ResponseEntity<String> indexImdbData() throws Exception {
-        searchservice.indexDatabase();
-        return ResponseEntity.accepted().build();
+        try{
+            searchservice.indexDatabase();
+            return ResponseEntity.accepted().build();
+        } catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
     }
     
     /* Performs a database search with a series of filters and aggregations passed by parameters,
@@ -236,7 +259,7 @@ public class SearchController {
             @ApiResponse(responseCode = "200", description = "The search process has been successfully completed."),
             @ApiResponse(responseCode = "500", description = "Error in the search process")
     })
-    @GetMapping("/search/")
+    @GetMapping(value ="/search/", produces = "application/json")
     public ResponseEntity <hits> search(
         @Nullable @RequestParam(name="genres") String [] genre,
 
@@ -253,10 +276,14 @@ public class SearchController {
         @Nullable @RequestParam(name="maxNHits") Integer nhits,
         @Nullable @RequestParam(name="sortRating") String sortRating
     ) throws Exception{
-        List<Movie>body = searchservice.processParam("simba",genre,minYear,maxYear,sortRating
-        ,minMinutes,maxMinutes,minScore,maxScore,type,nhits);
-        hits hits = new hits(body);
-        return ResponseEntity.created(null).body(hits);
+        try{
+            List<Movie>body = searchservice.processParam("simba",genre,minYear,maxYear,sortRating
+            ,minMinutes,maxMinutes,minScore,maxScore,type,nhits);
+            hits hits = new hits(body);
+            return ResponseEntity.ok(hits);
+        } catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
 }

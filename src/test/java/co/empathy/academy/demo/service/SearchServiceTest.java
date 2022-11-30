@@ -1,8 +1,10 @@
-package co.empathy.academy.demo.service;
+/*package co.empathy.academy.demo.service;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+
+import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,4 +28,20 @@ class SearchServiceTest {
         assertTrue(queryResults == "You Know, for Search");
     }
 
-}
+    @Test
+    void givenQueryAndField_whenTermQuery_thenMoviesReturned() throws IOException {
+        String query = "query";
+        String field = "field1";
+        given(elasticEngine.performQuery(any(), any(), any())).willReturn(new ArrayList<Movie>() {{
+            add(movie);
+        }});
+
+        List<Movie> movies = searchService.termQuery(query, field);
+
+        assertEquals(1, movies.size());
+        assertEquals(movie, movies.get(0));
+
+        verify(queriesService, times(1)).termQuery(query, field);
+        verify(elasticEngine, times(1)).performQuery(any(), any(), any());
+    }
+}*/

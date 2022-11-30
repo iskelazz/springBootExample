@@ -36,5 +36,4 @@ To shut down containers:
 ```sh
 http://localhost:8080/swagger-ui/index.html
 
-
    ```

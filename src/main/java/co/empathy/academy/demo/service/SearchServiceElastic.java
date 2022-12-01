@@ -94,12 +94,18 @@ public class SearchServiceElastic implements SearchService {
 
     //Basics y Ratings
     @Override
-    public void indexDatabase() throws Exception{
-        File basics = new File("/Users/alejandrorg/title.basics.tsv");
-        File ratings = new File("/Users/alejandrorg/title.ratings.tsv");
-        File akas = new File("/Users/alejandrorg/title.akas.tsv");
-        File crew = new File("/Users/alejandrorg/title.crew.tsv");
-        File principals = new File("/Users/alejandrorg/title.principals.tsv");
+    public void indexDatabase(String file_basics, String file_ratings, String akas_file, 
+    String crew_file, String principals_file) throws Exception{
+        // /Users/alejandrorg/title.basics.tsv
+        File basics = new File(file_basics);
+        // /Users/alejandrorg/title.ratings.tsv
+        File ratings = new File(file_ratings);
+        // /Users/alejandrorg/title.akas.tsv
+        File akas = new File(akas_file);
+        // /Users/alejandrorg/title.crew.tsv
+        File crew = new File(crew_file);
+        // /Users/alejandrorg/title.principals.tsv
+        File principals = new File(principals_file);
         ReaderTSV reader = new ReaderTSV(basics,ratings, akas, crew, principals);
         LinkedList<Movie> bulk = new LinkedList<>();
 

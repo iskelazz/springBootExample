@@ -26,11 +26,6 @@ public class Config {
         return new SearchDataAccessImp(elasticsearch);
     }
 
-    /*@Bean
-    public SearchService searchService(SearchEngine searchEngine) {
-        return new SearchServiceElastic(searchEngine);
-    }*/
-
     @Bean 
     public SearchService searchService(SearchEngine searchEngine, SearchDataAccess searchdata){
         return new SearchServiceElastic(searchEngine,searchdata);

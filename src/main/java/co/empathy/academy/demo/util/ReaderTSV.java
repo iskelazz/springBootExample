@@ -178,9 +178,9 @@ public class ReaderTSV {
                     }
                 }
                 if (basics_tsv[4].equals("0")){
-                    List<String> genre = Arrays.asList(basics_tsv[8].split(","));
+                    List<String> genres = Arrays.asList(basics_tsv[8].split(","));
                     Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, toInt(basics_tsv[5]), 
-                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes),index_aka,index_crew,index_principals);
+                    basics_tsv[6], toInt(basics_tsv[7]), genres,toDouble(rating),toInt(numVotes),index_aka,index_crew,index_principals);
                     //System.out.println(movie.toString());
                     results.add(movie);
                     numberRow++;
@@ -227,9 +227,9 @@ public class ReaderTSV {
                 }
                 //System.out.println(index_aka.toString());
                 if (basics_tsv[4].equals("0")){
-                    List<String> genre = Arrays.asList(basics_tsv[8].split(","));
+                    List<String> genres = Arrays.asList(basics_tsv[8].split(","));
                     Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, toInt(basics_tsv[5]), 
-                    basics_tsv[6], toInt(basics_tsv[7]), genre,toDouble(rating),toInt(numVotes),index_aka,index_crew, index_principals);
+                    basics_tsv[6], toInt(basics_tsv[7]), genres,toDouble(rating),toInt(numVotes),index_aka,index_crew, index_principals);
                     //System.out.println(movie.toString());
                     results.add(movie);
                     numberRow++;
@@ -332,7 +332,7 @@ public class ReaderTSV {
                 return false;
             }
             try {
-                if (value.trim().contentEquals("\\N")) return true;
+                if (value.trim().contentEquals("1")) return true;
                 else return false;
             } catch (NumberFormatException e) {
                // System.out.println(value);

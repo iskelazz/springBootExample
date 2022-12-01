@@ -23,7 +23,7 @@ public class Movie {
     private Integer startYear;
     private String endYear;
     private Integer runtimesMinutes;
-    private List<String> genre;  
+    private List<String> genres;  
     private Double averageRating;
     private Integer numVotes;
     private List<Aka> akas;

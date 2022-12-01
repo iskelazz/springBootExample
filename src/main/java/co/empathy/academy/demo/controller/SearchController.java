@@ -224,6 +224,11 @@ public class SearchController {
     }
 
     @Operation(summary = "Indexing imdb tsvs in elastic search")
+    @Parameter(name = "file_basics",description = "file with basics")
+    @Parameter(name = "file_ratings",description = "file with ratings")
+    @Parameter(name = "file_akas",description = "file with akas")
+    @Parameter(name = "file_crew",description = "file with crew")
+    @Parameter(name = "file_principals",description = "file with starring")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Data accepted"),
         //@ApiResponse(responseCode = "400", description = "Error indexing"),
@@ -231,9 +236,15 @@ public class SearchController {
     })
     //Builds database with the documents specified in the service
     @PostMapping(value = "/database", produces = "application/json")
-    public ResponseEntity<String> indexImdbData() throws Exception {
+    public ResponseEntity<String> indexImdbData(
+        @RequestParam(name="basics") String file_basics,
+        @RequestParam(name="ratings") String file_ratings,
+        @RequestParam(name="akas") String file_akas,
+        @RequestParam(name="crew") String file_crew,
+        @RequestParam(name="principals") String file_principals
+    ) throws Exception {
         try{
-            searchservice.indexDatabase();
+            searchservice.indexDatabase(file_basics, file_ratings, file_akas,file_crew, file_principals);
             return ResponseEntity.accepted().build();
         } catch (Exception e){
             return ResponseEntity.internalServerError().build();
@@ -261,7 +272,7 @@ public class SearchController {
     })
     @GetMapping(value ="/search/", produces = "application/json")
     public ResponseEntity <hits> search(
-        @Nullable @RequestParam(name="genres") String [] genre,
+        @Nullable @RequestParam(name="genres") String [] genres,
 
         @Nullable @RequestParam(name="minYear") Integer minYear,
         @Nullable @RequestParam(name="maxYear") Integer maxYear,
@@ -277,7 +288,7 @@ public class SearchController {
         @Nullable @RequestParam(name="sortRating") String sortRating
     ) throws Exception{
         try{
-            List<Movie>body = searchservice.processParam("simba",genre,minYear,maxYear,sortRating
+            List<Movie>body = searchservice.processParam("simba",genres,minYear,maxYear,sortRating
             ,minMinutes,maxMinutes,minScore,maxScore,type,nhits);
             hits hits = new hits(body);
             return ResponseEntity.ok(hits);

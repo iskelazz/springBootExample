@@ -158,7 +158,7 @@ public class JsonConversor {
             jsonObject.put("startYear", movie.getStartYear());
             jsonObject.put("endYear", movie.getEndYear());
             jsonObject.put("runtimeMinutes", movie.getRuntimesMinutes());
-            jsonObject.put("genre", movie.getGenre());
+            jsonObject.put("genre", movie.getGenres());
             jsonObject.put("averageRating",movie.getAverageRating());
             jsonObject.put("numVotes",movie.getNumVotes());
             jsonObject.put("akas",movie.getAkas());

@@ -33,7 +33,7 @@ public interface SearchService {
     List<Movie> minAverageRating (String index) throws ElasticsearchException, IOException;
 
     //Indexing
-    void indexDatabase() throws Exception; 
+    void indexDatabase(String file_basics, String file_ratings, String akas_file, String crew_file, String principals_file) throws Exception; 
 
 
 }

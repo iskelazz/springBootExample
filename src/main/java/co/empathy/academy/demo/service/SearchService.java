@@ -27,10 +27,6 @@ public interface SearchService {
     void mapping(String index, String mapping) throws Exception;
     void analyzer(String index, String mapping) throws Exception;
     
-    
-    //Filters
-    List<Movie> maxAverageRating (String index) throws ElasticsearchException, IOException;
-    List<Movie> minAverageRating (String index) throws ElasticsearchException, IOException;
 
     //Indexing
     void indexDatabase(String file_basics, String file_ratings, String akas_file, String crew_file, String principals_file) throws Exception; 

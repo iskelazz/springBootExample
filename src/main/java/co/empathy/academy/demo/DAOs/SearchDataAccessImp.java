@@ -115,11 +115,11 @@ public class SearchDataAccessImp implements SearchDataAccess{
     }
 
     @Override
-    public List<Movie> throwQuery(Query query, String index) throws ElasticsearchException, IOException {
+    public List<Movie> throwQuery(Query query, String index, int nhits) throws ElasticsearchException, IOException {
         SearchResponse<Movie> response = esClient.search(s -> s
         .index(index)
         .query(query)
-        .size(25), Movie.class);
+        .size(nhits), Movie.class);
 
         return response.hits().hits().stream()
         .map(Hit::source)

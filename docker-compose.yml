@@ -3,14 +3,14 @@ services:
   elasticsearch:
     image: "iskelazzz/co.empathy.academy.indexedelastic:lastest"
     hostname: "elasticsearch"
-    container_name: elasticsearch-docker
+    container_name: es-imdb
     environment:
       - "discovery.type=single-node"
     ports:
       - "9200:9200"
 
   searchapi:
-    container_name: searchApi
+    container_name: searchIMDb
     build:
       context: .
       dockerfile: Dockerfile

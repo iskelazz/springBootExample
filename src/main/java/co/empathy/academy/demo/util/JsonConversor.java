@@ -22,7 +22,7 @@ public class JsonConversor {
         JSONArray akaArray = json.optJSONArray("akas");
         JSONArray directorArray = json.optJSONArray("directors");
         JSONArray starringArray = json.optJSONArray("starring");
-        subItemArray = json.optJSONArray("genre");
+        subItemArray = json.optJSONArray("genres");
         if (null != subItemArray) {
             for (int j = 0; j < subItemArray.length(); j++) {
                 String subItemObject = subItemArray.optString(j);
@@ -59,7 +59,7 @@ public class JsonConversor {
 
         for (int i = 0; i < data.length(); i++) {
             JSONObject json = data.getJSONObject(i);
-            subItemArray = json.optJSONArray("genre");
+            subItemArray = json.optJSONArray("genres");
             akaArray = json.optJSONArray("akas");
             directorArray = json.optJSONArray("directors");
             starringArray = json.optJSONArray("starring");
@@ -158,7 +158,7 @@ public class JsonConversor {
             jsonObject.put("startYear", movie.getStartYear());
             jsonObject.put("endYear", movie.getEndYear());
             jsonObject.put("runtimeMinutes", movie.getRuntimesMinutes());
-            jsonObject.put("genre", movie.getGenres());
+            jsonObject.put("genres", movie.getGenres());
             jsonObject.put("averageRating",movie.getAverageRating());
             jsonObject.put("numVotes",movie.getNumVotes());
             jsonObject.put("akas",movie.getAkas());

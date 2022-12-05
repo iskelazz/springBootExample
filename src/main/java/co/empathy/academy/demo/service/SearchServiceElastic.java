@@ -25,7 +25,6 @@ import co.empathy.academy.demo.util.Validator;
 
 public class SearchServiceElastic implements SearchService {
 
-    private static final int INT_MAX = 2000000000;
     private static final int MAX_VALUE_QUERY = 999999;
     private static final int MIN_VOTES = 15000;
 
@@ -40,23 +39,23 @@ public class SearchServiceElastic implements SearchService {
     
     @Override
     public List<Movie> search(String query, String index) throws Exception {
-        return elasticClient.throwQuery(elasticClient.matchQuery(query,"originalTitle"), index);
+        return elasticClient.throwQuery(elasticClient.matchQuery(query,"originalTitle"), index,25);
     }
 
     @Override
     public List<Movie> multiMatchSearch(String query, String fields, String index) throws ElasticsearchException, IOException {
         String[] fieldsArray = fields.split(",");
-        return elasticClient.throwQuery(elasticClient.multiMatchQuery(query, fieldsArray), index);
+        return elasticClient.throwQuery(elasticClient.multiMatchQuery(query, fieldsArray), index,25);
     }
 
     @Override
     public List<Movie> queryTermSearch(String query, String field, String index) throws ElasticsearchException, IOException{
-        return elasticClient.throwQuery(elasticClient.queryTerm(query,field), index);
+        return elasticClient.throwQuery(elasticClient.queryTerm(query,field), index,25);
     }
 
     @Override
     public List<Movie> queryTermsSearch(String query[], String field, String index) throws ElasticsearchException, IOException{
-        return elasticClient.throwQuery(elasticClient.queryTerms(query,field), index);
+        return elasticClient.throwQuery(elasticClient.queryTerms(query,field), index,25);
     }
 
     @Override
@@ -125,17 +124,7 @@ public class SearchServiceElastic implements SearchService {
     //By default, order by numVotes
     
 
-    @Override
-    public List<Movie> maxAverageRating (String index) throws ElasticsearchException, IOException{
-        Map<String, Aggregation> map = elasticClient.orderBy("averageRating", SortOrder.Desc,25);
-        return elasticClient.throwOrderByQuery(elasticClient.numericFilter("numVotes",30000,INT_MAX),map, index, "averageRating");
-    }
-
-    @Override
-    public List<Movie> minAverageRating (String index) throws ElasticsearchException, IOException{
-        Map<String, Aggregation> map = elasticClient.orderBy("averageRating", SortOrder.Asc,25);
-        return elasticClient.throwOrderByQuery(elasticClient.numericFilter("numVotes",30000,INT_MAX,0.1),map, index, "averageRating");
-    }
+   
 
     public List<Query> genreFilter (String index, String[] genre) throws Exception {
         List<Query> List_genre = new LinkedList<>();

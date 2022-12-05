@@ -24,7 +24,7 @@ public interface SearchDataAccess {
     Query multiMatchQuery (String query, String[] fields);
     Query queryTerms(String[] values, String field);
     Query queryTerm (String value, String field);
-    List<Movie>throwQuery(Query query, String index) throws ElasticsearchException, IOException;    
+    List<Movie>throwQuery(Query query, String index, int nhits) throws ElasticsearchException, IOException;    
     List<Movie> throwOrderByQuery(Query query,Map<String,Aggregation> aggs, String index, String key) throws ElasticsearchException, IOException;
     Map<String, Aggregation> orderBy(String key, SortOrder sort, int nhits);
 

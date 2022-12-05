@@ -270,7 +270,7 @@ public class SearchController {
             @ApiResponse(responseCode = "200", description = "The search process has been successfully completed."),
             @ApiResponse(responseCode = "500", description = "Error in the search process")
     })
-    @GetMapping(value ="/search/", produces = "application/json")
+    @GetMapping(value ={"/search/","/search"}, produces = "application/json")
     public ResponseEntity <hits> search(
         @Nullable @RequestParam(name="genres") String [] genres,
 

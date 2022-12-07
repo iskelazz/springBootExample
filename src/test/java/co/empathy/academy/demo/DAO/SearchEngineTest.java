@@ -54,15 +54,4 @@ class SearchEngineTest {
         assertEquals(resp,realResp);
     }
 
-/* 
-    @Test
-    void givenNoQuery_whenSearch_thenPropagateError() throws Exception {
-        SearchEngine searchEngine = mock(SearchEngine.class);
-        Throwable expectedException = new Exception("Error while searching");
-        given(searchEngine.search(null)).willThrow(expectedException);
-
-        SearchService searchService = new SearchServiceElastic(searchEngine);
-
-        assertThrows(expectedException.getClass(), () -> searchService.search(null));
-    }*/
 }

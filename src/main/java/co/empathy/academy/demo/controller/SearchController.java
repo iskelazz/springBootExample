@@ -223,7 +223,7 @@ public class SearchController {
         }
     }
 
-    @Operation(summary = "Indexing imdb tsvs in elastic search")
+    @Operation(summary = "Indexing imdb tsv files in elasticSearch")
     @Parameter(name = "file_basics",description = "file with basics")
     @Parameter(name = "file_ratings",description = "file with ratings")
     @Parameter(name = "file_akas",description = "file with akas")
@@ -231,10 +231,10 @@ public class SearchController {
     @Parameter(name = "file_principals",description = "file with starring")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Data accepted"),
-        //@ApiResponse(responseCode = "400", description = "Error indexing"),
+        @ApiResponse(responseCode = "400", description = "All parameters are mandatory"),
         @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    //Builds database with the documents specified in the service
+    //Builds database with the documents specified in the parameters
     @PostMapping(value = "/database", produces = "application/json")
     public ResponseEntity<String> indexImdbData(
         @RequestParam(name="basics") String file_basics,
@@ -243,6 +243,8 @@ public class SearchController {
         @RequestParam(name="crew") String file_crew,
         @RequestParam(name="principals") String file_principals
     ) throws Exception {
+        if(file_basics == null || file_ratings == null || file_akas ==null || file_crew==null || file_principals == null)
+            return ResponseEntity.badRequest().build();
         try{
             searchservice.indexDatabase(file_basics, file_ratings, file_akas,file_crew, file_principals);
             return ResponseEntity.accepted().build();
@@ -268,6 +270,7 @@ public class SearchController {
     @Parameter(name = "sortRating", description = "sort by rating in ascending or descending order")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The search process has been successfully completed."),
+            @ApiResponse(responseCode = "400", description = "Some parameters is incorrect"),
             @ApiResponse(responseCode = "500", description = "Error in the search process")
     })
     @GetMapping(value ={"/search/","/search"}, produces = "application/json")
@@ -287,6 +290,8 @@ public class SearchController {
         @Nullable @RequestParam(name="maxNHits") Integer nhits,
         @Nullable @RequestParam(name="sortRating") String sortRating
     ) throws Exception{
+        if(nhits!=null && (nhits>100 || nhits < 1))
+            return ResponseEntity.badRequest().build();
         try{
             List<Movie>body = searchservice.processParam("simba",genres,minYear,maxYear,sortRating
             ,minMinutes,maxMinutes,minScore,maxScore,type,nhits);

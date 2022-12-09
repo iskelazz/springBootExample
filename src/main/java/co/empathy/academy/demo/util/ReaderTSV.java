@@ -37,7 +37,7 @@ public class ReaderTSV {
     private LinkedList<String[]> principalslist = new LinkedList<>();
 
 
-    
+    /* All files are mandatory */
 
     public ReaderTSV(File basics, File ratings, File akas, File crew, File principals) {
         try {
@@ -83,7 +83,13 @@ public class ReaderTSV {
         extractHeadersCrew();
         extractHeadersPrincipals();
     }
-
+    /* 
+     * It indexes using the id as reference to link the document rows, it takes advantage of its 
+     * pseudo-order (Ordered substring (2,9)) to avoid loops, crew, principals, ratings and akas 
+     * elements are evaluated before and added to a list, then, basics elements iterate the lists to, 
+     * if they find matches with their id, add the information to the document to be indexed. 
+     * The basics elements are always indexed
+    */
     public LinkedList<Movie> tsvToMovies() throws IOException{
         Integer numberRow = 0;
 
@@ -181,7 +187,6 @@ public class ReaderTSV {
                     List<String> genres = Arrays.asList(basics_tsv[8].split(","));
                     Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, toInt(basics_tsv[5]), 
                     basics_tsv[6], toInt(basics_tsv[7]), genres,toDouble(rating),toInt(numVotes),index_aka,index_crew,index_principals);
-                    //System.out.println(movie.toString());
                     results.add(movie);
                     numberRow++;
                 }
@@ -190,7 +195,6 @@ public class ReaderTSV {
                     if (rat[0].equals(basics_tsv[0])){
                         rating = rat[1];
                         numVotes = rat[2];
-                        //ratingslist.remove(rat); 
                         break;
                     }
                 }
@@ -203,7 +207,6 @@ public class ReaderTSV {
                     if (ak[0].equals(basics_tsv[0])){
                         Aka result = new Aka(ak[1],ak[2],ak[3],toBool(ak[4]));
                         index_aka.add(result);
-                        //akaslist.remove(ak); 
                     }
                 }
                 List<Director> index_crew = new LinkedList<>();
@@ -225,7 +228,6 @@ public class ReaderTSV {
                         index_principals.add(starring);
                     }
                 }
-                //System.out.println(index_aka.toString());
                 if (basics_tsv[4].equals("0")){
                     List<String> genres = Arrays.asList(basics_tsv[8].split(","));
                     Movie movie = new Movie(basics_tsv[0], basics_tsv[1], basics_tsv[2], basics_tsv[3], false, toInt(basics_tsv[5]), 
@@ -248,13 +250,16 @@ public class ReaderTSV {
     public boolean getFinished(){
         return isfinished;
     }
-
+    /*
+     * This function analyzes the lines in which the basics reader(BufferedReader) and another document(passed by parameters) are found, 
+     * decides which of the two documents moves forward and, if they are in the same id root, 
+     * adds the rows of the document(the one that is not basics) to a list.
+     */
     private String findIDGenerics(String id_basics, String line_file, int numberRow, 
         List<String []> list, String key, BufferedReader aReader) throws IOException{
         String [] processed = line_file.split("\t");
         int basics = toInt(id_basics.substring(2,9));
         int generic = toInt(processed[0].substring(2,9));
-        //System.out.println("Basics " + basics + ", ratings: " + ratings);
         String newLine = null;
         if (basics == generic){
             list.clear();
@@ -303,26 +308,22 @@ public class ReaderTSV {
 
     public static int toInt(String value) {
         if (value.trim().contentEquals("\\N")) {
-            //System.out.println(value);
             return 0;
         }
         try {
             return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {
-           // System.out.println(value);
             return 0;
         }
     }
 
     public static double toDouble(String value) {
         if (value.trim().contentEquals("\\N")) {
-            //System.out.println(value);
             return 0;
         }
         try {
             return Double.parseDouble(value.trim());
         } catch (NumberFormatException e) {
-           // System.out.println(value);
             return 0;
         }
     }
@@ -335,7 +336,6 @@ public class ReaderTSV {
                 if (value.trim().contentEquals("1")) return true;
                 else return false;
             } catch (NumberFormatException e) {
-               // System.out.println(value);
                 return false;
             }
     }

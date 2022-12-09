@@ -22,7 +22,7 @@ public class Movie {
     private Boolean isAdult;
     private Integer startYear;
     private String endYear;
-    private Integer runtimesMinutes;
+    private Integer runtimeMinutes;
     private List<String> genres;  
     private Double averageRating;
     private Integer numVotes;

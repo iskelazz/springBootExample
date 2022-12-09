@@ -17,7 +17,7 @@ import co.empathy.academy.demo.Models.Starring;
 public class JsonConversor {
     //less the genre list. No used yet
     public static Movie jsontoMovie(JSONObject json){
-        LinkedList<String> genre = new LinkedList<>();
+        LinkedList<String> genres = new LinkedList<>();
         JSONArray subItemArray;
         JSONArray akaArray = json.optJSONArray("akas");
         JSONArray directorArray = json.optJSONArray("directors");
@@ -27,7 +27,7 @@ public class JsonConversor {
             for (int j = 0; j < subItemArray.length(); j++) {
                 String subItemObject = subItemArray.optString(j);
                 String subItem = subItemObject;
-                genre.add(subItem);
+                genres.add(subItem);
             }
         }
         return new Movie(
@@ -38,8 +38,8 @@ public class JsonConversor {
                 json.optBoolean("isAdult"),
                 json.optInt("startYear"),
                 json.optString("endYear"),
-                json.optInt("runtimesMinutes"),
-                genre,
+                json.optInt("runtimeMinutes"),
+                genres,
                 json.optDouble("averageRating"),
                 json.optInt("numVotes"),
                 jsontoAka(akaArray),
@@ -63,13 +63,13 @@ public class JsonConversor {
             akaArray = json.optJSONArray("akas");
             directorArray = json.optJSONArray("directors");
             starringArray = json.optJSONArray("starring");
-            LinkedList<String> genre = new LinkedList<>();
+            LinkedList<String> genres = new LinkedList<>();
 
             if (null != subItemArray) {
                 for (int j = 0; j < subItemArray.length(); j++) {
                     String subItemObject = subItemArray.optString(j);
                     String subItem = subItemObject;
-                    genre.add(subItem);
+                    genres.add(subItem);
                 }
     }
             Movie castor = new Movie (
@@ -80,8 +80,8 @@ public class JsonConversor {
                 json.optBoolean("isAdult"),
                 json.optInt("startYear"),
                 json.optString("endYear"),
-                json.optInt("runtimesMinutes"),
-                genre,
+                json.optInt("runtimeMinutes"),
+                genres,
                 json.optDouble("averageRating"),
                 json.optInt("numVotes"),
                 jsontoAka(akaArray),
@@ -157,7 +157,7 @@ public class JsonConversor {
             jsonObject.put("isAdult", movie.getIsAdult());
             jsonObject.put("startYear", movie.getStartYear());
             jsonObject.put("endYear", movie.getEndYear());
-            jsonObject.put("runtimeMinutes", movie.getRuntimesMinutes());
+            jsonObject.put("runtimeMinutes", movie.getRuntimeMinutes());
             jsonObject.put("genres", movie.getGenres());
             jsonObject.put("averageRating",movie.getAverageRating());
             jsonObject.put("numVotes",movie.getNumVotes());

@@ -129,7 +129,7 @@ public class SearchServiceElastic implements SearchService {
     public List<Query> genreFilter (String index, String[] genre) throws Exception {
         List<Query> List_genre = new LinkedList<>();
         for (int i = 0; i<genre.length;i++){
-            List_genre.add(elasticClient.matchQuery(genre[i],"genre"));
+            List_genre.add(elasticClient.matchQuery(genre[i],"genres"));
         }
         return List_genre;
     }
@@ -143,7 +143,7 @@ public class SearchServiceElastic implements SearchService {
     public Query runtimeFilter (Integer minValue, Integer maxValue) throws Exception {
         if (minValue == null) minValue = 0;
         if (maxValue == null) maxValue = MAX_VALUE_QUERY;
-        return elasticClient.numericFilter("runtimesMinutes",minValue,maxValue);
+        return elasticClient.numericFilter("runtimeMinutes",minValue,maxValue);
     }
 
     public Query averageRatingFilter (Float minRating, Float maxRating) throws Exception {
@@ -161,7 +161,7 @@ public class SearchServiceElastic implements SearchService {
     }
 
     @Override
-    public List<Movie> processParam(String index, String[] genre, Integer minYear, Integer maxYear, String sortRating,
+    public List<Movie> processParam(String index, String[] genres, Integer minYear, Integer maxYear, String sortRating,
     Integer minMinutes, Integer maxMinutes, Float minRating, Float maxRating, String type, Integer nhits) throws Exception {
         Map<String, Aggregation> map;
         List<Query> List_queries = new LinkedList<>();
@@ -179,8 +179,8 @@ public class SearchServiceElastic implements SearchService {
             else map = elasticClient.orderBy(key, order,10);
             List_queries.add(numVotesFilter(MIN_VOTES));
         }
-        if (genre != null){
-            List_queries.addAll(genreFilter(index,genre));
+        if (genres != null){
+            List_queries.addAll(genreFilter(index,genres));
         }
         if ((maxYear != null) || (minYear!=null)){
             List_queries.add(rangeYearFilter(minYear, maxYear));
